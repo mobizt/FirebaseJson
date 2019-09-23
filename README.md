@@ -1,4 +1,4 @@
-# The Firebase Json Arduino library for Espressif ESP8266/ESP32.
+# The Firebase Json Arduino library for ESP8266/ESP32.
 
 
 This Arduino library is for create, edit and get the value from JSON object in simple way which best for Firebase v 2.0.0
