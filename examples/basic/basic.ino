@@ -9,7 +9,6 @@ void setup()
     Serial.println();
     Serial.println();
 
-
     FirebaseJson json1;
     FirebaseJsonArray arr1;
     FirebaseJsonData jsonData;
@@ -19,6 +18,8 @@ void setup()
     arr1.add(777);
     arr1.add();
     arr1.add(0.274);
+    String t = "";
+    String arrStr, jsonStr;
 
     json1.add("key1", "to dance with my father again");
     json1.add("key2", 222.493);
@@ -27,13 +28,15 @@ void setup()
     Serial.println("-----------------------------------------------");
     Serial.println("Array 1 data");
     Serial.println("-----------------------------------------------");
-    Serial.println(arr1.toString(true));
+    arr1.toString(arrStr, true);
+    Serial.println(arrStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
     Serial.println("JSON object with nested Array 1 data");
     Serial.println("-----------------------------------------------");
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
@@ -44,14 +47,14 @@ void setup()
 
     Serial.println("Data type: " + jsonData.type);
     Serial.println("Data type Num: " + String(jsonData.typeNum));
-    
+
     //Check the type of returned data and success
     if (jsonData.type == "array" && jsonData.success)
     {
 
         jsonData.getArray(arr2);
         Serial.println("Array Size: " + String(arr2.size()));
-        for (int i = 0; i < arr2.size(); i++)
+        for (size_t i = 0; i < arr2.size(); i++)
         {
             arr2.get(jsonData, i);
             if (jsonData.type == "string" /* jsonData.typeNum == JSON_STRING */)
@@ -76,54 +79,56 @@ void setup()
     Serial.println("Remove nested Array 1 value at index 2 from JSON");
     Serial.println("-----------------------------------------------");
     json1.remove("key3/[2]");
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
     Serial.println("Remove Array 1 value at index 0 from JSON Array");
     Serial.println("-----------------------------------------------");
     arr1.remove(0);
-    Serial.println(arr1.toString(true));
+    arr1.toString(arrStr, true);
+    Serial.println(arrStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
     Serial.println("Set or update JSON object at key3");
     Serial.println("-----------------------------------------------");
     json1.set("key3", "This is replaced text instead of array");
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
     Serial.println("Plain JSON object string");
     Serial.println("-----------------------------------------------");
-    Serial.println(json1.toString());
+    json1.toString(jsonStr);
+    Serial.println(jsonStr);
     Serial.println();
 
     Serial.println("-----------------------------------------------");
     Serial.println("Iterate all JSMN tokens");
     Serial.println("-----------------------------------------------");
-   
 
     FirebaseJsonData jsonParseResult;
-    json1.parse();
-    size_t count =json1.getJsonObjectIteratorCount();
+
+    size_t count = json1.iteratorBegin();
     String key;
     String value;
+    int type = 0;
 
     for (size_t i = 0; i < count; i++)
     {
-        json1.jsonObjectiterator(i,key,value);
-        jsonParseResult = json1.parseResult();
+        json1.iteratorGet(i, type, key, value);
 
         Serial.print("KEY: ");
         Serial.print(key);
         Serial.print(", ");
         Serial.print("VALUE: ");
-        Serial.print(value); 
+        Serial.print(value);
         Serial.print(", ");
         Serial.print("TYPE: ");
-        Serial.println(jsonParseResult.type);        
-
+        Serial.println(type == JSMN_OBJECT ? "object" : "array");
     }
 
     Serial.println();
@@ -131,7 +136,6 @@ void setup()
     json1.clear();
     arr1.clear();
     arr2.clear();
-
 }
 
 void loop()

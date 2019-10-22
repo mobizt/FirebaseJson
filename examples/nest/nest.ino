@@ -11,8 +11,6 @@ void setup()
 
     FirebaseJson json1;
 
-    json1.setJsonData("{\"menu\":{\"header\":\"SVG Viewer\",\"items\":[{\"id\":\"Open\"},{\"id\":\"OpenNew\",\"label\":\"Open New\"},null,{\"id\":\"ZoomIn\",\"label\":\"Zoom In\"},{\"id\":\"ZoomOut\",\"label\":\"Zoom Out\"},{\"id\":\"OriginalView\",\"label\":\"Original View\"},null,{\"id\":\"Quality\"},{\"id\":\"Pause\"},{\"id\":\"Mute\"},null,{\"id\":\"Find\",\"label\":\"Find...\"},{\"id\":\"FindAgain\",\"label\":\"Find Again\"},{\"id\":\"Copy\"},{\"id\":\"CopyAgain\",\"label\":\"Copy Again\"},{\"id\":\"CopySVG\",\"label\":\"Copy SVG\"},{\"id\":\"ViewSVG\",\"label\":\"View SVG\"},{\"id\":\"ViewSource\",\"label\":\"View Source\"},{\"id\":\"SaveAs\",\"label\":\"Save As\"},null,{\"id\":\"Help\"},{\"id\":\"About\",\"label\":\"About Adobe CVG Viewer...\"}]}}");
-
     FirebaseJsonArray arr1;
     arr1.set("[0]/int", 123);
     arr1.set("[0]/double", 456.789);
@@ -32,14 +30,17 @@ void setup()
 
     FirebaseJsonData jsonObj;
 
+    String jsonStr;
+
     json1.set("anotherNode/data/[0]", "How are you?");
     json1.set("anotherNode/data/[2]", arr1);
 
-    json1.get(jsonObj, "menu/items/[5]/label");
+    json1.get(jsonObj, "anotherNode/data/[2]", true);
 
     Serial.println("-------------------------");
 
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
 
     Serial.println("-------------------------");
 
@@ -47,20 +48,22 @@ void setup()
 
     Serial.println("-------------------------");
 
-    json1.remove("menu/items");
+    json1.remove("anotherNode/data/[0]");
 
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
 
     Serial.println("-------------------------");
 
     json1.set("anotherNode/data/[6]/That/is", "my house");
-    json1.get(jsonObj, "anotherNode/data/[6]/That/is");
+    json1.get(jsonObj, "anotherNode/data/[6]/That/is", true);
 
     Serial.println(jsonObj.stringValue);
 
     Serial.println("-------------------------");
 
-    Serial.println(json1.toString(true));
+    json1.toString(jsonStr, true);
+    Serial.println(jsonStr);
 }
 
 void loop()
