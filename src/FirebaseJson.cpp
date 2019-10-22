@@ -1263,7 +1263,6 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
     bool insertFlag = false;
     bool ex = false;
     delayMicroseconds(10);
-
     if (searchIndex > -1)
     {
         tk_index_t tk2;
@@ -1284,7 +1283,6 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
                 }
                 else
                 {
-
                     if (!_TkRefOk)
                     {
                         _parseCompleted++;
@@ -1372,21 +1370,18 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
         {
             if (_tokenCount == 1 && h->size == 0 && !removeTk)
             {
-
                 _insertChilds(replace, printMode);
-                // _nextToken = i + 1;
-                // _nextDepth = 0;
-                // _parseCompleted = _pathTk.size();
-                // _tokenMatch = true;
-                // ex = true;
+                _nextToken = i + 1;
+                _nextDepth = 0;
+                _parseCompleted = _pathTk.size();
+                _tokenMatch = true;
+                ex = true;
             }
         }
         delete[] key;
     }
     if (ex)
         return;
-
-    return;
     h = &_tokens.get()[i];
     if (h->type == JSMN_OBJECT || h->type == JSMN_ARRAY)
     {
