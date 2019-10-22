@@ -285,7 +285,7 @@ public:
     
     @param key - The new key string that value to be added.
 
-    @param value - The integer value for new specified key.
+    @param value - The integer/unsigned short value for new specified key.
 
     @return instance of an object.
 
@@ -653,7 +653,7 @@ public:
     FirebaseJsonArray &add(const String &value);
 
     /*
-    Add string to FirebaseJsonArray object.
+    Add string (chars arrar) to FirebaseJsonArray object.
 
     @param value - The char array to add.
 

@@ -841,9 +841,9 @@ void FirebaseJson::_addArrNodes(std::string &str, std::string &str2, int index, 
     char *cm = new char[3];
     memset(brk3, 0, 3);
     memset(brk4, 0, 3);
-    memset(tab, 0, 3);
+    memset(tab, 0, 6);
     memset(nl, 0, 3);
-    memset(nll, 0, 5);
+    memset(nll, 0, 6);
     memset(cm, 0, 3);
     strcpy_P(brk3, FirebaseJson_STR_10);
     strcpy_P(brk4, FirebaseJson_STR_11);
@@ -904,7 +904,7 @@ void FirebaseJson::_addObjNodes(std::string &str, std::string &str2, int index, 
     char *pr2 = new char[3];
     memset(brk1, 0, 3);
     memset(brk2, 0, 3);
-    memset(tab, 0, 3);
+    memset(tab, 0, 6);
     memset(nl, 0, 3);
     memset(qt, 0, 3);
     memset(pr, 0, 4);
@@ -1263,6 +1263,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
     bool insertFlag = false;
     bool ex = false;
     delayMicroseconds(10);
+
     if (searchIndex > -1)
     {
         tk_index_t tk2;
@@ -1283,6 +1284,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
                 }
                 else
                 {
+
                     if (!_TkRefOk)
                     {
                         _parseCompleted++;
@@ -1370,18 +1372,21 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *qt, c
         {
             if (_tokenCount == 1 && h->size == 0 && !removeTk)
             {
+
                 _insertChilds(replace, printMode);
-                _nextToken = i + 1;
-                _nextDepth = 0;
-                _parseCompleted = _pathTk.size();
-                _tokenMatch = true;
-                ex = true;
+                // _nextToken = i + 1;
+                // _nextDepth = 0;
+                // _parseCompleted = _pathTk.size();
+                // _tokenMatch = true;
+                // ex = true;
             }
         }
         delete[] key;
     }
     if (ex)
         return;
+
+    return;
     h = &_tokens.get()[i];
     if (h->type == JSMN_OBJECT || h->type == JSMN_ARRAY)
     {
