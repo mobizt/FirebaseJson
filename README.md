@@ -120,7 +120,7 @@ Function `FirebaseData.jsonArray` and `FirebaseData.jsonArrayPtr` will provide F
 
 
 
-The following example show how to use FirebaseJson.
+The following example shows how to use FirebaseJson.
 
 ```C++
 //Declare FirebaseJson object (global or local)
@@ -244,7 +244,7 @@ if(jsonData.success)
 ```
 
 
-The following example show how to use FirebaseJsonArray.
+The following example shows how to use FirebaseJsonArray.
 
 ```C++
 //Declare FirebaseJsonArray object (global or local)
