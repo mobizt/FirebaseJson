@@ -205,7 +205,7 @@ Serial.println(jsonStr);
 The result of above code
 
 {
-     "name": "Living Room",
+    "name": "Living Room",
     "temp1": [
          47,
          34,
@@ -230,12 +230,12 @@ json.get(jsonData, "unit/temp2");
 
 if (jsonData.success)
 {
-  //Print tType of parsed data e.g string, int, double, bool, object, array, null and undefined
+  //Print type of parsed data e.g string, int, double, bool, object, array, null and undefined
   Serial.println(jsonData.type);
   //Print its content e.g.string, int, double, bool whereas object, array and null also can access as string
   Serial.println(jsonData.stringValue);
   //Serial.println(jsonData.intValue);
-  /Serial.println(jsonData.boolValue);
+  //Serial.println(jsonData.boolValue);
   //Serial.println(jsonData.doubleValue);
 }
 
