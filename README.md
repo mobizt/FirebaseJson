@@ -1431,6 +1431,7 @@ bool getJSON(FirebaseJson &json);
 The MIT License (MIT)
 
 Copyright (c) 2019 K. Suwatchai (Mobizt)
+
 Copyright (c) 2012–2018, Serge Zaitsev, zaitsev.serge@gmail.com
 
 
