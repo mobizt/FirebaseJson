@@ -432,6 +432,7 @@ size_t FirebaseJson::iteratorBegin(const char *data)
     delete[] nbuf;
     return _eltk.size();
 }
+
 void FirebaseJson::iteratorEnd()
 {
     _eltk.clear();
@@ -959,7 +960,7 @@ void FirebaseJson::_parseToken(uint16_t &i, char *buf, int &depth, char *searchK
     size_t resLen = _jsonData._dbuf.length();
     if (searchIndex == -2)
         tk.skip = true;
-    delayMicroseconds(10);
+    delay(0);
     if (searchIndex > -1)
     {
         tk_index_t tk2;
@@ -1135,7 +1136,7 @@ void FirebaseJson::_parseToken(uint16_t &i, char *buf, int &depth, char *searchK
         {
             while (_updateTkIndex3(i, depth, searchKey, searchIndex, printMode))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
         }
     }
@@ -1194,7 +1195,7 @@ void FirebaseJson::_parseToken(uint16_t &i, char *buf, int &depth, char *searchK
                 i++;
                 while (_updateTkIndex3(i, depth, searchKey, searchIndex, printMode))
                 {
-                    delayMicroseconds(1);
+                    delay(0);
                 }
             }
             else
@@ -1227,7 +1228,7 @@ void FirebaseJson::_parseToken(uint16_t &i, char *buf, int &depth, char *searchK
             }
             while (_updateTkIndex3(i, depth, searchKey, searchIndex, printMode))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
             if (_collectTk)
             {
@@ -1255,7 +1256,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *searc
     jsmntok_t *h = &_tokens.get()[i];
     bool insertFlag = false;
     bool ex = false;
-    delayMicroseconds(10);
+    delay(0);
     if (searchIndex > -1)
     {
         tk_index_t tk2;
@@ -1422,7 +1423,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *searc
         {
             while (_updateTkIndex(i, depth, searchKey, searchIndex, replace, printMode, removeTk))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
         }
     }
@@ -1489,7 +1490,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *searc
                 i++;
                 while (_updateTkIndex(i, depth, searchKey, searchIndex, replace, printMode, removeTk))
                 {
-                    delayMicroseconds(1);
+                    delay(0);
                 }
             }
             else
@@ -1544,7 +1545,7 @@ void FirebaseJson::_compileToken(uint16_t &i, char *buf, int &depth, char *searc
             }
             while (_updateTkIndex(i, depth, searchKey, searchIndex, replace, printMode, removeTk))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
         }
         delete[] tmp;
@@ -1562,7 +1563,7 @@ void FirebaseJson::_removeToken(uint16_t &i, char *buf, int &depth, char *search
     tk_index_t tk;
     _getTkIndex(depth, tk);
     jsmntok_t *h = &_tokens.get()[i];
-    delayMicroseconds(10);
+    delay(0);
     if (refTokenIndex == i && refTokenIndex > -1)
         ncm = _remFirstTk;
     if (refTokenIndex != i || (refTokenIndex == i && _remLastTk))
@@ -1621,7 +1622,7 @@ void FirebaseJson::_removeToken(uint16_t &i, char *buf, int &depth, char *search
         {
             while (_updateTkIndex2(_tbuf, i, depth, searchKey, searchIndex, replace, printMode))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
         }
     }
@@ -1673,7 +1674,7 @@ void FirebaseJson::_removeToken(uint16_t &i, char *buf, int &depth, char *search
                 i++;
                 while (_updateTkIndex2(_tbuf, i, depth, searchKey, searchIndex, replace, printMode))
                 {
-                    delayMicroseconds(1);
+                    delay(0);
                 }
             }
             else
@@ -1716,7 +1717,7 @@ void FirebaseJson::_removeToken(uint16_t &i, char *buf, int &depth, char *search
             }
             while (_updateTkIndex2(_tbuf, i, depth, searchKey, searchIndex, replace, printMode))
             {
-                delayMicroseconds(1);
+                delay(0);
             }
         }
         delete[] tmp;
@@ -1810,7 +1811,7 @@ void FirebaseJson::_strToTk(const std::string &str, std::vector<std::string> &co
             cont.push_back(s);
         previous = current + 1;
         current = str.find(delim, previous);
-        delayMicroseconds(1);
+        delay(0);
     }
     s = str.substr(previous, current - previous);
     _trim(s);
