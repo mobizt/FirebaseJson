@@ -1,10 +1,11 @@
 # The Firebase Json Arduino library for ESP8266/ESP32.
 
 
-Parse and edit JSON object directly with specified relative path as in Firebase v 2.2.4
+The easiest Arduino library JSON parser, builder and editor, v 2.2.4.
 
+Able to Parse, create and Edit the simple or complex (depth nested) JSON object by just specify the relative node/element path
 
-This library supports any Arduino supported MCU, ESP8266 and ESP32 are recommended. 
+This library supports any Arduino based MCU, ESP8266 and ESP32 are recommended. 
 
 
 ## Tested Devices
@@ -16,9 +17,9 @@ This library supports any Arduino supported MCU, ESP8266 and ESP32 are recommend
 ## Features
 
 
-* **None recursive operations**
+* **None recursive parseing**
 
-* **Parse and edit JSON object directly with specified relative path as used in Firebase**
+* **Parse, Create and Edit JSON object directly by just specify relative path to the node element**
 
 * **Prettify JSON string**
 
@@ -27,7 +28,7 @@ This library supports any Arduino supported MCU, ESP8266 and ESP32 are recommend
 ## Dependencies
 
 
-This library required **ESP8266 Core SDK version 2.4.0 and above or ESP32 Core SDK version 1.0.2 and above**.
+For ESP8266 and ESP32, the library requires **ESP8266 Core SDK version 2.4.0 and above or ESP32 Core SDK version 1.0.2 and above**.
 
 For Arduino IDE, ESP8266/ESP32 Core SDK can be installed through **Boards Manager**. 
 
@@ -39,16 +40,16 @@ For PlatfoemIO IDE, ESP8266 Core SDK can be installed through **PIO Home** > **P
 ## Installation
 
 
-For Arduino IDE, click on **Clone or download** dropdown at the top of repository, select **Download ZIP** 
+For Arduino IDE, from Github repo, select **Clone or download** dropdown at the top of repository, select **Download ZIP** 
 
-From Arduino IDE, goto menu **Sketch** -> **Include Library** -> **Add .ZIP Library...**.
+From Arduino IDE, select menu **Sketch** -> **Include Library** -> **Add .ZIP Library...**.
 
 Choose **FirebaseJson-master.zip** that previously downloaded.
 
 Go to menu **Files** -> **Examples** -> **FirebaseJson-master** and choose one from examples.
 
 
-For PlatformIO, create folder **"FirebaseJson"** in folder **"lib"** and save **[these files](https://github.com/mobizt/FirebaseJson/tree/master/src)** in there.
+For PlatformIO, create folder named **"FirebaseJson"** in the **"lib"** folder and save **[these files](https://github.com/mobizt/FirebaseJson/tree/master/src)** in it.
 
 
 

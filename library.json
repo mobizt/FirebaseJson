@@ -1,0 +1,12 @@
+{
+    "name": "FirebaseJson",
+    "keywords": "json, parse, rest, http",
+    "description": "The easiest Arduino library JSON parser, builder and editor for ESP8266, ESP32 and others MCUs.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mobizt/FirebaseJson"
+    },
+    "frameworks": "arduino",
+    "platforms": "*",
+    "version": "2.2.4"
+}
