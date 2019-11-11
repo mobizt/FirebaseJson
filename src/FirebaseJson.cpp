@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.2.4
+ * FirebaseJson, version 2.2.5
  * 
  * The Easiest ESP8266/ESP32 Arduino library for parse, create and edit JSON object using relative path.
  * 
- * October 27, 2019
+ * November 12, 2019
  * 
  * Features
  * - None recursive operations
@@ -674,25 +674,29 @@ bool FirebaseJson::_updateTkIndex(uint16_t index, int &depth, char *searchKey, i
                             }
                             else
                             {
-                                for (int k = _el[i].oindex - 1; k < searchIndex; k++)
+                                if (!_arrReplaced)
                                 {
-                                    if (printMode == PRINT_MODE_PRETTY)
+                                    for (int k = _el[i].oindex - 1; k < searchIndex; k++)
                                     {
-                                        _jsonData._dbuf += _nl;
-                                        for (int j = 0; j < depth + 2; j++)
-                                            _jsonData._dbuf += _tab;
-                                    }
-                                    if (k == searchIndex - 1)
-                                    {
-                                        if (_parseCompleted == (int)_pathTk.size())
-                                            _jsonData._dbuf += replace;
+                                        if (printMode == PRINT_MODE_PRETTY)
+                                        {
+                                            _jsonData._dbuf += _nl;
+                                            for (int j = 0; j < depth + 2; j++)
+                                                _jsonData._dbuf += _tab;
+                                        }
+                                        if (k == searchIndex - 1)
+                                        {
+                                            if (_parseCompleted == (int)_pathTk.size())
+                                                _jsonData._dbuf += replace;
+                                            else
+                                                _insertChilds(replace, printMode);
+                                            _arrReplaced = true;
+                                        }
                                         else
-                                            _insertChilds(replace, printMode);
-                                    }
-                                    else
-                                    {
-                                        _jsonData._dbuf += _nll;
-                                        _jsonData._dbuf += _cm;
+                                        {
+                                            _jsonData._dbuf += _nll;
+                                            _jsonData._dbuf += _cm;
+                                        }
                                     }
                                 }
                             }
@@ -1853,6 +1857,7 @@ void FirebaseJson::_parse(const char *path, PRINT_MODE printMode)
     _parentIndex = -1;
     _TkRefOk = false;
     _parseCompleted = 0;
+    _arrReplaced = false;
     _refTkIndex = -1;
     _remTkIndex = -1;
     _remFirstTk = false;
@@ -2154,6 +2159,7 @@ void FirebaseJson::_set(const char *path, const char *data)
     _parentIndex = -1;
     _TkRefOk = false;
     _parseCompleted = 0;
+    _arrReplaced = false;
     _refTkIndex = -1;
     _remTkIndex = -1;
     _remFirstTk = false;
@@ -2182,6 +2188,7 @@ void FirebaseJson::_set(const char *path, const char *data)
         _parentIndex = -1;
         _TkRefOk = false;
         _parseCompleted = 0;
+        _arrReplaced = false;
         _refTkIndex = -1;
         _tokenMatch = false;
         _paresRes = true;
@@ -2229,6 +2236,7 @@ bool FirebaseJson::remove(const String &path)
     _parentIndex = -1;
     _TkRefOk = false;
     _parseCompleted = 0;
+    _arrReplaced = false;
     _refTkIndex = -1;
     _remTkIndex = -1;
     _remFirstTk = false;
@@ -2256,6 +2264,7 @@ bool FirebaseJson::remove(const String &path)
         _parentIndex = -1;
         _TkRefOk = false;
         _parseCompleted = 0;
+        _arrReplaced = false;
         _refTkIndex = -1;
         _tokenMatch = false;
         _paresRes = true;
