@@ -3,7 +3,7 @@
 
 The easiest Arduino library JSON parser, builder and editor, v 2.2.7.
 
-FirebaseJson don't use the recursive call to parse or desialize complex or nested JSON objects and arrays. 
+FirebaseJson doesn't use the recursive call to parse or desialize complex or nested JSON objects and arrays. 
 
 This makes the library can use with limited stack memory device. 
 
