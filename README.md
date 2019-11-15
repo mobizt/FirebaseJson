@@ -3,7 +3,11 @@
 
 The easiest Arduino library JSON parser, builder and editor, v 2.2.7.
 
-Able to Parse, create and Edit the simple or complex (depth nested) JSON object by just specify the relative node/element path
+FirebaseJson don't use the recursive call to parse or desialize complex or nested JSON objects and arrays. 
+
+This make the library can use with limited stack memory device. 
+
+Able to Parse, create and Edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
 
 This library supports any Arduino based MCU, ESP8266 and ESP32 are recommended. 
 
@@ -59,7 +63,9 @@ For PlatformIO, create folder named **"FirebaseJson"** in the **"lib"** folder a
 ## Usages
 
 
-FirebaseJson library is so simple to use as you read, store and update(edit) the JSON node in Firebase RTDB.
+FirebaseJson usages are so simple as you read, store and update(edit) the JSON node in Firebase RTDB.
+
+
 
 Since you declare the FirebaseJson (object) or FirebaseJsonArray, use the functions `setJsonData`, `add`, `set` and `remove`
 to build or edit JSON object and use `get` to parse the node's contents. 
