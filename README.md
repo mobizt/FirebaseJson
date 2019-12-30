@@ -1,7 +1,7 @@
 # The Firebase Json Arduino library for ESP8266/ESP32.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.2.8.
+The easiest Arduino library JSON parser, builder and editor, v 2.2.9.
 
 FirebaseJson doesn't use the recursive call to parse or desialize complex or nested JSON objects and arrays. 
 
