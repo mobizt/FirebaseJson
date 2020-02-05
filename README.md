@@ -3,9 +3,9 @@
 
 The easiest Arduino library JSON parser, builder and editor, v 2.2.9.
 
-FirebaseJson doesn't use the recursive call to parse or desialize complex or nested JSON objects and arrays. 
+FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
-This makes the library can use with limited stack memory device. 
+This makes the library can use with the limited stack memory device. 
 
 Able to Parse, create and Edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
 
@@ -21,9 +21,9 @@ This library supports any Arduino based MCU, ESP8266 and ESP32 are recommended.
 ## Features
 
 
-* **None recursive parseing**
+* **None recursive parsing**
 
-* **Parse, Create and Edit JSON object directly by just specify relative path to the node element**
+* **Parse, Create and Edit JSON object directly by just specify the relative path to the node element**
 
 * **Prettify JSON string**
 
@@ -68,7 +68,7 @@ FirebaseJson usages are so simple as you read, store and update(edit) the JSON n
 
 
 Since you declare the FirebaseJson (object) or FirebaseJsonArray, use the functions `setJsonData`, `add`, `set` and `remove`
-to build or edit JSON object and use `get` to parse the node's contents. 
+to build or edit the JSON object and use `get` to parse the node's contents. 
 
 Defined the relative path of the specific node to `add`, `set`, `remove` and `get` functions to add, set, remove and get its contents.
 
@@ -76,13 +76,13 @@ Defined the relative path of the specific node to `add`, `set`, `remove` and `ge
 Function `FirebaseJson.setJsonData` is to set the JSON string to JSON object.
 
 
-Function `FirebaseJson.add` is used for add the new node with the contents e.g. String, Number (int and double), Boolean, Array and Object to the defined relative path.
+Function `FirebaseJson.add` is used to add the new node with the contents e.g. String, Number (int and double), Boolean, Array and Object to the defined relative path.
 
 
 Function `FirebaseJson.set` is used for edit, overwrite, create new (if not exist) node with contents e.g. String, Number (int and double), Boolean, Array and Object at the defined relative path.
 
 
-Function `FirebaseJson.remove` is used for remove node and all its children contents at the defined relative path. 
+Function `FirebaseJson.remove` is used to remove the node and all its children's contents at the defined relative path. 
 
 
 Function `FirebaseJson.toString` is used for (pretty or plain) print out the JSON object as Arduino string (this function takes String param).
@@ -101,7 +101,7 @@ Function `FirebaseJsonArray.set` is for edit, overwrite, create new (if not exis
 
 
 
-Function `FirebaseJsonArray.remove` is used for remove array's contents at the defined relative path or defined index of JSON array.
+Function `FirebaseJsonArray.remove` is used to remove the array's contents at the defined relative path or defined index of JSON array.
 
 
 
@@ -111,7 +111,7 @@ Function `FirebaseJsonArray.toString` is used for (pretty or plain) print out th
 Function `FirebaseJsonArray.clear` is used for clear JSON object contents.
 
 
-To acquired the JSON object or JSON Array from FirebaseData object which returned from get, set, push operations, these following functions are required.
+To acquired the JSON object or JSON Array from FirebaseData object which returned from the get, set, push operations, these following functions are required.
 
 `FirebaseData.jsonObject`
 
@@ -133,7 +133,7 @@ The following example shows how to use FirebaseJson.
 //Declare FirebaseJson object (global or local)
 FirebaseJson json;
 
-//Add key1 with value 100 to JSON object
+//Add key name with value Living Room to JSON object
 json.add("name", "Living Room");
 
 //Add temp1 with value 120 and temp1 with 40 to JSON object
@@ -150,7 +150,7 @@ json.toString(jsonStr, true);
 Serial.println(jsonStr);
 
 /*
-This is the result of above code
+This is the result of the above code
 
 {
     "name": "Living Room",
@@ -164,7 +164,7 @@ This is the result of above code
 */
 
 //To set array to the above JSON using FirebaseJson directly
-//Set (add) array indexes 0,1,2,5,7 under temp1, the original value will be replaced with new one.
+//Set (add) array indexes 0, 1, 2, 5, and 7 under temp1, the original value will be replaced with new one.
 json.set("temp1/[0]", 47);
 json.set("temp1/[1]", 28);
 json.set("temp1/[2]", 34);
@@ -176,7 +176,7 @@ json.toString(jsonStr, true);
 Serial.println(jsonStr);
 
 /*
-The result of above code
+The result of the above code
 
 {
     "name": "Living Room",
@@ -209,7 +209,7 @@ json.toString(jsonStr, true);
 Serial.println(jsonStr);
 
 /*
-The result of above code
+The result of the above code
 
 {
     "name": "Living Room",
@@ -230,7 +230,7 @@ The result of above code
 */
 
 //Now parse/read the contents from specific node unit/temp2
-//FirebaseJsonData is required to keep the parse results which can be access later
+//FirebaseJsonData is required to keep the parse results which can be accessed later
 FirebaseJsonData jsonData;
 
 json.get(jsonData, "unit/temp2");
@@ -289,8 +289,6 @@ Array index: 6, type: int, value: 25
 */
  
 
-
-
 ```
 
 
@@ -319,7 +317,7 @@ arr.toString(arrStr, true);
 Serial.println(arrStr);
 
 /*
-This is the result of above code
+This is the result of the above code
 
 [
     "banana",
@@ -349,7 +347,7 @@ arr.toString(arrStr, true);
 Serial.println(arrStr);
 
 /*
-The result of above code
+The result of the above code
 
 [
     "banana",
@@ -430,7 +428,7 @@ myJson.iteratorEnd();
 
 
 /*
-The result of above code
+The result of the above code
 
 0, Type: object, Key: food, Value: salad
 1, Type: object, Key: sweet, Value: cake
@@ -492,9 +490,9 @@ FirebaseJson &add(const String &key);
 
 #### Add string to FirebaseJson object.
     
-param **`key`** - The new key string that string value to be addedd.
+param **`key`** - The new key string that string value to be added.
 
-param **`value`** - The String value for new specified key.
+param **`value`** - The String value for the new specified key.
 
 return **`instance of an object.`**
 
@@ -511,7 +509,7 @@ FirebaseJson &add(const String &key, const String &value);
     
 param **`key`** - The new key string that string (chars array) value to be added.
 
-param **`value`** - The char array for new specified key.
+param **`value`** - The char array for the new specified key.
 
 return **`instance of an object.`**
 
@@ -526,7 +524,7 @@ FirebaseJson &add(const String &key, const char *value);
 
 #### Add integer/unsigned short to FirebaseJson object.
     
-param **`key`** - The new key string that value to be added.
+param **`key`** - The new key string that the value to be added.
 
 param **`value`** - The integer/unsigned short value for new specified key.
 
@@ -546,7 +544,7 @@ FirebaseJson &add(const String &key, unsigned short value);
     
 param **`key`** - The new key string that double value to be added.
 
-param **`value`** - The double value for new specified key.
+param **`value`** - The double value for the new specified key.
 
 return **`instance of an object.`**
 
@@ -578,7 +576,7 @@ FirebaseJson &add(const String &key, bool value);
     
 param **`key`** - The new key string that FirebaseJson object to be added.
 
-param **`json`** - The FirebaseJson object for new specified key.
+param **`json`** - The FirebaseJson object for the new specified key.
 
 return **`instance of an object.`**
 
@@ -595,7 +593,7 @@ FirebaseJson &add(const String &key, FirebaseJson &json);
     
 param **`key`** - The new key string that FirebaseJsonArray object to be added.
 
-param **`arr`** - The FirebaseJsonArray for new specified key.
+param **`arr`** - The FirebaseJsonArray for the new specified key.
 
 return **`instance of an object.`**
 
@@ -612,7 +610,7 @@ FirebaseJson &add(const String &key, FirebaseJsonArray &arr);
 
 param **`buf`** - The returning String object.
 
-param **`prettify`** - Boolean flag for return the pretty format string i.e. with text indentation and newline.. 
+param **`prettify`** - Boolean flag for return the pretty format string i.e. with text indentation and newline. 
 
 
 ```C++
@@ -624,15 +622,15 @@ void toString(String &buf, bool prettify = false);
 
 
 
-#### Get the value from specified node path in FirebaseJson object.
+#### Get the value from the specified node path in FirebaseJson object.
 
 param **`jsonData`** - The returning FirebaseJsonData that hold the returned data.
 
 param **`path`** - Relative path to the specific node in FirebaseJson object.
 
-param **`prettify`** - The bool flag for prettify string in FirebaseJsonData's stringValue.
+param **`prettify`** - The bool flag for the prettifying string in FirebaseJsonData's stringValue.
 
-return **`boolean status of operation.`**
+return **`boolean status of the operation.`**
 
     The FirebaseJsonData object holds the returned data which can be read from the following properties.
 
@@ -644,12 +642,12 @@ return **`boolean status of operation.`**
 
     jsonData.boolValue - contains the returned boolean value.
 
-    jsonData.success - used to determine the result of get operation.
+    jsonData.success - used to determine the result of the get operation.
 
     jsonData.type - used to determine the type of returned value in string represent 
     the types of value e.g. string, int, double, boolean, array, object, null and undefined.
 
-    jsonData.typeNum used to determine the type of returned value in integer as represented by the following value.
+    jsonData.typeNum used to determine the type of returned value is an integer as represented by the following value.
     
     JSON_UNDEFINED = 0
     JSON_OBJECT = 1
@@ -672,7 +670,7 @@ return **`boolean status of operation.`**
 
 #### Parse and collect all node/array elements in FirebaseJson object.  
 
-param **`data`** - The JSON data string to parse (optional for replace the internal buffer with new data).
+param **`data`** - The JSON data string to parse (optional for replacing the internal buffer with new data).
 
 return **`number`** of child/array elements in FirebaseJson object.
 
@@ -691,7 +689,7 @@ param **`index`** - The element index to get.
 
 param **`type`** - The integer which holds the type of data i.e. JSON_OBJECT and JSON_ARR
 
-param **`key`** - The string which holds the key/name of object, can return empty String if the data type is array.
+param **`key`** - The string which holds the key/name of the object, can return empty String if the data type is an array.
 
 param **`value`** - The string which holds the value for the element key or array.   
 
@@ -712,7 +710,7 @@ param **`value`** - The string which holds the value for the element key or arra
 
 
 
-#### Set null to FirebaseJson object at specified node path.
+#### Set null to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that null to be set.
 
@@ -728,7 +726,7 @@ void set(const String &path);
 
 
 
-#### Set String value to FirebaseJson object at specified node path.
+#### Set String value to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that string value to be set.
 
@@ -746,7 +744,7 @@ void set(const String &path, const String &value);
 
 
 
-#### Set string (chars array) value to FirebaseJson object at specified node path.
+#### Set string (chars array) value to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that string (chars array) to be set.
 
@@ -783,7 +781,7 @@ void set(const String &path, unsigned short value);
 
 
 
-#### Set double value to FirebaseJson object at specified node path.
+#### Set the double value to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that double value to be set.
 
@@ -802,7 +800,7 @@ void set(const String &path, double value);
 
 
 
-#### Set boolean value to FirebaseJson object at specified node path.
+#### Set the boolean value to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that bool value to be set.
 
@@ -821,7 +819,7 @@ void set(const String &path, bool value);
 
 
 
-#### Set nested FirebaseJson object to FirebaseJson object at specified node path.
+#### Set nested FirebaseJson object to FirebaseJson object at the specified node path.
     
 param **`path`** - The relative path that nested FirebaseJson object to be set.
 
@@ -858,11 +856,11 @@ void set(const String &path, FirebaseJsonArray &arr);
 
 
 
-#### Remove specified node and its content.
+#### Remove the specified node and its content.
 
 param **`path`** - The relative path to remove its contents/children.
 
-return **`bool`** value represents the success operation.
+return **`bool`** value represents the successful operation.
 
 ```C++
 bool remove(const String &path);
@@ -993,11 +991,11 @@ FirebaseJsonArray &add(FirebaseJsonArray &arr);
 
 #### Get the array value at specified index from FirebaseJsonArray object.
 
-param **`jsonObj`** - The returning FirebaseJsonData object that holds data at specified index.
+param **`jsonObj`** - The returning FirebaseJsonData object that holds data at the specified index.
 
 param **`index`** - Index of data in FirebaseJsonArray object.    
 
-return **`boolean`** status of operation.
+return **`boolean`** status of the operation.
 
 ```C++
 bool get(FirebaseJsonData &jsonObj, int index);
@@ -1010,15 +1008,15 @@ bool get(FirebaseJsonData *jsonData, int index);
 
 
 
-#### Get the array value at specified path from FirebaseJsonArray object.
+#### Get the array value at the specified path from FirebaseJsonArray object.
 
-param **`jsonObj`** - The returning FirebaseJsonData object that holds data at specified path.
+param **`jsonObj`** - The returning FirebaseJsonData object that holds data at the specified path.
 
 param **`path`** - Relative path to data in FirebaseJsonArray object.    
 
-return **`boolean status of operation.`**
+return **`boolean status of the operation.`**
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1032,7 +1030,7 @@ bool get(FirebaseJsonData &jsonData, const String &path);
 
 #### Get the length of array in FirebaseJsonArray object.  
 
-return **`length of array.`**
+return **`length of the array.`**
 
 ```C++
 size_t size();
@@ -1195,11 +1193,11 @@ void set(int index, FirebaseJsonArray &arr);
 
 
     
-#### Set null to FirebaseJson object at specified path.
+#### Set null to FirebaseJson object at the specified path.
     
 param **`path`** - The relative path that null to be set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1216,7 +1214,7 @@ param **`path`** - The relative path that string value to be set.
 
 param **`value`** - The String to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1232,7 +1230,7 @@ param **`path`** - The relative path that string (chars array) value to be set.
 
 param **`value`** - The char array to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1249,7 +1247,7 @@ param **`path`** - The relative path that integer/unsigned short value to be set
 
 param **`value`** - The integer value to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1267,7 +1265,7 @@ param **`path`** - The relative path that double value to be set.
 
 param **`value`** - The double to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
  ```C++
@@ -1284,7 +1282,7 @@ param **`path`** - The relative path that bool value to be set.
 
 param **`value`** - The boolean value to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1295,13 +1293,13 @@ void set(const String &path, bool value);
 
 
 
-#### Set the nested FirebaseJson object to FirebaseJsonArray object at specified path.
+#### Set the nested FirebaseJson object to FirebaseJsonArray object at the specified path.
     
 param **`path`** - The relative path that nested FirebaseJson object to be set.
 
 param **`value`** - The FirebaseJson object to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1319,7 +1317,7 @@ param **`path`** - The relative path that nested FirebaseJsonArray object to be 
 
 param **`value`** - The FirebaseJsonArray object to set.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1335,7 +1333,7 @@ void set(const String &path, FirebaseJsonArray &arr);
 
 param **`index`** - The array index to be removed.
 
-return **`bool`** value represents the success operation.
+return **`bool`** value represents the successful operation.
 
 ```C++
 bool remove(int index);
@@ -1346,13 +1344,13 @@ bool remove(int index);
 
 
 
-#### Remove the array value at specified path from FirebaseJsonArray object.
+#### Remove the array value at the specified path from FirebaseJsonArray object.
 
 param **`path`** - The relative path to array in FirebaseJsonArray object to be removed.
 
-return **`bool`** value represents the success operation.
+return **`bool`** value represents the successful operation.
 
-The relative path must be begin with array index (number placed inside square brackets) followed by 
+The relative path must begin with array index (number placed inside square brackets) followed by 
 other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
 
 ```C++
@@ -1370,9 +1368,9 @@ bool remove(const String &path);
     
 param **`jsonArray`** -The returning FirebaseJsonArray object.
 
-return **`bool`** status for success operation.
+return **`bool`** status for successful operation.
 
-This should call after pares or get function.
+This should call after pares or get functions.
 
 ```C++
 bool getArray(FirebaseJsonArray &jsonArray);
@@ -1386,9 +1384,9 @@ bool getArray(FirebaseJsonArray &jsonArray);
     
 param **`jsonArray`** - The returning FirebaseJson object.
 
-return **`bool`** status for success operation.
+return **`bool`** status for successful operation.
 
-This should call after pares or get function.
+This should call after pares or get functions.
 
 ```C++
 bool getJSON(FirebaseJson &json);
@@ -1407,7 +1405,7 @@ bool getJSON(FirebaseJson &json);
 
 **`boolValue`** The bool value of parses data.
 
-**`success`** used to determine the result of get operation.
+**`success`** used to determine the result of the get operation.
 
 **`type`** The type String of parses data e.g. string, int, double, boolean, array, object, null and undefined.
 
