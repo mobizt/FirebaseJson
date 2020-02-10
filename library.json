@@ -8,5 +8,5 @@
     },
     "frameworks": "arduino",
     "platforms": "*",
-    "version": "2.2.9"
+    "version": "2.3.1"
 }
