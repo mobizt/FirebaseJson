@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "FirebaseJson.h"
+#include <FirebaseJson.h>
 
 void setup()
 {
@@ -13,6 +13,7 @@ void setup()
     FirebaseJsonArray arr1;
     FirebaseJsonData jsonData;
     FirebaseJsonArray arr2;
+    
 
     arr1.add("Val 1");
     arr1.add(777);
@@ -128,7 +129,7 @@ void setup()
         Serial.print(value);
         Serial.print(", ");
         Serial.print("TYPE: ");
-        Serial.println(type == JSMN_OBJECT ? "object" : "array");
+        Serial.println(type == FirebaseJson::JSMN_OBJECT ? "object" : "array");
     }
 
     Serial.println();

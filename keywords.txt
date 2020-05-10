@@ -7,8 +7,8 @@
 #######################################
 
 FirebaseJson    KEYWORD1
-FirebaseJsonArray	KEYWORD1
-FirebaseJsonData  KEYWORD1
+FirebaseJsonArray   KEYWORD1
+FirebaseJsonData    KEYWORD1
 
 ###############################################
 # Methods and Functions for FirebaseJson (KEYWORD2)
@@ -20,8 +20,8 @@ add KEYWORD2
 toString    KEYWORD2
 get KEYWORD2
 parse   KEYWORD2
-iteratorBegin  KEYWORD2
-iteratorEnd  KEYWORD2
+iteratorBegin   KEYWORD2
+iteratorEnd KEYWORD2
 iteratorGet KEYWORD2
 set KEYWORD2
 remove  KEYWORD2
@@ -41,10 +41,10 @@ getJson KEYWORD2
 # Constants (LITERAL1)
 #######################################
 JSON_UNDEFINED  LITERAL1
-JSON_OBJECT  LITERAL1
+JSON_OBJECT LITERAL1
 JSON_ARRAY  LITERAL1
-JSON_STRING  LITERAL1
-JSON_INT  LITERAL1
-JSON_DOUBLE  LITERAL1
-JSON_BOOL  LITERAL1
-JSON_NULL  LITERAL1
+JSON_STRING LITERAL1
+JSON_INT    LITERAL1
+JSON_DOUBLE LITERAL1
+JSON_BOOL   LITERAL1
+JSON_NULL   LITERAL1

@@ -1,7 +1,7 @@
 # The Firebase Json Arduino library for ESP8266/ESP32.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.2.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.4.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -414,8 +414,8 @@ for (size_t i = 0; i < len; i++)
   Serial.print(i);
   Serial.print(", ");
   Serial.print("Type: ");
-  Serial.print(type == JSON_OBJECT ? "object" : "array");
-  if (type == JSON_OBJECT)
+  Serial.print(type == FirebaseJson::OBJECT ? "object" : "array");
+  if (type == FirebaseJson::OBJECT)
   {
     Serial.print(", Key: ");
     Serial.print(key);
@@ -649,14 +649,14 @@ return **`boolean status of the operation.`**
 
     jsonData.typeNum used to determine the type of returned value is an integer as represented by the following value.
     
-    JSON_UNDEFINED = 0
-    JSON_OBJECT = 1
-    JSON_ARRAY = 2
-    JSON_STRING = 3
-    JSON_INT = 4
-    JSON_DOUBLE = 5
-    JSON_BOOL = 6 and
-    JSON_NULL = 7
+    FirebaseJson::UNDEFINED = 0
+    FirebaseJson::OBJECT = 1
+    FirebaseJson::ARRAY = 2
+    FirebaseJson::STRING = 3
+    FirebaseJson::INT = 4
+    FirebaseJson::DOUBLE = 5
+    FirebaseJson::BOOL = 6 and
+    FirebaseJson::NULL = 7
 
  
  ```C++
@@ -687,7 +687,7 @@ return **`number`** of child/array elements in FirebaseJson object.
     
 param **`index`** - The element index to get.
 
-param **`type`** - The integer which holds the type of data i.e. JSON_OBJECT and JSON_ARR
+param **`type`** - The integer which holds the type of data i.e. FirebaseJson::OBJECT and FirebaseJson::ARR
 
 param **`key`** - The string which holds the key/name of the object, can return empty String if the data type is an array.
 
@@ -1411,21 +1411,21 @@ bool getJSON(FirebaseJson &json);
 
 **`typeNum`** The type (number) of parses data in form of the following **`jsonDataType`** value.
 
-**JSON_UNDEFINED = 0**
+**FirebaseJson::UNDEFINED = 0**
 
-**JSON_OBJECT = 1**
+**FirebaseJson::OBJECT = 1**
 
-**JSON_ARRAY = 2**
+**FirebaseJson::ARRAY = 2**
 
-**JSON_STRING = 3**
+**FirebaseJson::STRING = 3**
 
-**JSON_INT = 4**
+**FirebaseJson::INT = 4**
 
-**JSON_DOUBLE = 5**
+**FirebaseJson::DOUBLE = 5**
 
-**JSON_BOOL = 6 and**
+**FirebaseJson::BOOL = 6 and**
 
-**JSON_NULL = 7**
+**FirebaseJson::NULL = 7**
 
 **`success`** The success flag of parsing data.
 
