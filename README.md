@@ -1,21 +1,24 @@
 # The Firebase Json Arduino library for ESP8266/ESP32.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.4.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.5.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
 This makes the library can use with the limited stack memory device. 
 
-Able to Parse, create and Edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
+Able to Parse, create and edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
 
-This library supports any Arduino based MCU, ESP8266 and ESP32 are recommended. 
+This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cortext M4) and Teensy 4.x (ARM-Cortext M7) are recommended. 
 
 
 ## Tested Devices
 
  * ESP8266
  * ESP32
+ * Teensy 3.6
+ * Teensy 4.0
+ * Teensy 4.1
 
 
 ## Features
@@ -34,10 +37,12 @@ This library supports any Arduino based MCU, ESP8266 and ESP32 are recommended.
 
 For ESP8266 and ESP32, the library requires **ESP8266 Core SDK version 2.4.0 and above or ESP32 Core SDK version 1.0.2 and above**.
 
-For Arduino IDE, ESP8266/ESP32 Core SDK can be installed through **Boards Manager**. 
+To install the ESP8266 Core SDK from Arduino IDE, ESP8266/ESP32 Core SDK can be installed through **Boards Manager**. 
 
 For PlatfoemIO IDE, ESP8266 Core SDK can be installed through **PIO Home** > **Platforms** > **Espressif 8266 or Espressif 32**.
 
+
+For Teensy 3.x and Teensy 4.x, **[Teensyduino](https://www.pjrc.com/teensy/td_download.html)** was required and can be downloaded.
 
 
 
@@ -53,8 +58,11 @@ Choose **FirebaseJson-master.zip** that previously downloaded.
 Go to menu **Files** -> **Examples** -> **FirebaseJson-master** and choose one from examples.
 
 
-For PlatformIO, create folder named **"FirebaseJson"** in the **"lib"** folder and save **[these files](https://github.com/mobizt/FirebaseJson/tree/master/src)** in it.
+For PlatformIO IDE, using the following command.
 
+pio lib install "FirebaseJson"
+
+Or at PIO Home -> Library -> Registry then search FirebaseJson.
 
 
 
@@ -76,10 +84,10 @@ Defined the relative path of the specific node to `add`, `set`, `remove` and `ge
 Function `FirebaseJson.setJsonData` is to set the JSON string to JSON object.
 
 
-Function `FirebaseJson.add` is used to add the new node with the contents e.g. String, Number (int and double), Boolean, Array and Object to the defined relative path.
+Function `FirebaseJson.add` is used to add the new node with the contents e.g. String, Number (int, float, and double), Boolean, Array and Object to the defined relative path.
 
 
-Function `FirebaseJson.set` is used for edit, overwrite, create new (if not exist) node with contents e.g. String, Number (int and double), Boolean, Array and Object at the defined relative path.
+Function `FirebaseJson.set` is used for edit, overwrite, create new (if not exist) node with contents e.g. String, Number (int, float, and double), Boolean, Array and Object at the defined relative path.
 
 
 Function `FirebaseJson.remove` is used to remove the node and all its children's contents at the defined relative path. 
@@ -97,7 +105,7 @@ Function `FirebaseJson.clear` is used for clear JSON object contents.
 Function `FirebaseJsonArray.add` is used for adding the new contents e.g. String, Number (int and double), Boolean, Array and Object to JSON array.
 
 
-Function `FirebaseJsonArray.set` is for edit, overwrite, create new (if not exist) contents e.g. String, Number (int and double), Boolean, Array and Object at the defined relative path or defined index of JSON array.
+Function `FirebaseJsonArray.set` is for edit, overwrite, create new (if not exist) contents e.g. String, Number (int, float, and double), Boolean, Array and Object at the defined relative path or defined index of JSON array.
 
 
 
@@ -168,8 +176,8 @@ This is the result of the above code
 json.set("temp1/[0]", 47);
 json.set("temp1/[1]", 28);
 json.set("temp1/[2]", 34);
-json.set("temp1/[5]", 23); //null will be created at array index 3,4 due to it's not yet assigned
-json.set("temp1/[7]", 25); //null will be created at array index 6
+json.set("temp1/[5]", 23); //null will be created at the array index 3 and 4 due to they're not yet assigned
+json.set("temp1/[7]", 25); //null will be created at the array index 6
 
 //Print out as prettify string
 json.toString(jsonStr, true);
@@ -243,6 +251,7 @@ if (jsonData.success)
   Serial.println(jsonData.stringValue);
   //Serial.println(jsonData.intValue);
   //Serial.println(jsonData.boolValue);
+  //Serial.println(jsonData.floatValue);
   //Serial.println(jsonData.doubleValue);
 }
 
@@ -259,7 +268,7 @@ json.get(jsonData, "temp1");
 //Prepare FirebaseJsonArray to take the array from FirebaseJson
 FirebaseJsonArray myArr;
 
-//Get array data
+//Get the array data
 jsonData.getArray(myArr);
 
 //Call get with FirebaseJsonData to parse the array at defined index i
@@ -311,7 +320,7 @@ arr.set("[1]/appetizer", "snack");
 arr.set("[2]", "apple"); // or arr.set(2, "apple");
 arr.set("[4]/[0]/[1]/amount", 20);
 
-//Print out array as prettify string
+//Print out the array as prettify string
 String arrStr;
 arr.toString(arrStr, true);
 Serial.println(arrStr);
@@ -342,7 +351,7 @@ This is the result of the above code
 //Remove array content at /4/0/1/amount
 arr.remove("[4]/[0]/[1]/amount");
 
-//Print out as prettify string
+//Print out the array as prettify string
 arr.toString(arrStr, true);
 Serial.println(arrStr);
 
@@ -381,6 +390,7 @@ if(jsonData.success)
   Serial.println(jsonData.stringValue);
   //Serial.println(jsonData.intValue);
   //Serial.println(jsonData.boolValue);
+  //Serial.println(jsonData.floatValue);
   //Serial.println(jsonData.doubleValue);
 
 }
@@ -402,7 +412,7 @@ FirebaseJson myJson;
 jsonData.getJSON(myJson);
 
 //Parse the JSON object as list
-//Get the number of items
+//Get the counts of the items
 size_t len = myJson.iteratorBegin();
 String key, value = "";
 int type = 0;
@@ -423,7 +433,7 @@ for (size_t i = 0; i < len; i++)
   Serial.print(", Value: ");
   Serial.println(value);
 }
-//Clear all list to free memory
+//Clear the list to free memory
 myJson.iteratorEnd();
 
 
@@ -539,6 +549,22 @@ FirebaseJson &add(const String &key, unsigned short value);
 
 
 
+#### Add float to FirebaseJson object.
+    
+param **`key`** - The new key string that float value to be added.
+
+param **`value`** - The float value for the new specified key.
+
+return **`instance of an object.`**
+
+```C++
+FirebaseJson &add(const String &key, float value);
+```
+
+
+
+
+
 
 #### Add double to FirebaseJson object.
     
@@ -638,6 +664,8 @@ return **`boolean status of the operation.`**
 
     jsonData.intValue - contains the returned integer value.
 
+    jsonData.floatValue - contains the returned float value.
+
     jsonData.doubleValue - contains the returned double value.
 
     jsonData.boolValue - contains the returned boolean value.
@@ -654,9 +682,10 @@ return **`boolean status of the operation.`**
     FirebaseJson::ARRAY = 2
     FirebaseJson::STRING = 3
     FirebaseJson::INT = 4
-    FirebaseJson::DOUBLE = 5
-    FirebaseJson::BOOL = 6 and
-    FirebaseJson::NULL = 7
+    FirebaseJson::FLOAT = 5
+    FirebaseJson::DOUBLE = 6
+    FirebaseJson::BOOL = 7 and
+    FirebaseJson::NULL = 8
 
  
  ```C++
@@ -774,6 +803,23 @@ e.g. /myRoot/[2]/Sensor1/myData/[3].
 void set(const String &path, int value);
 void set(const String &path, unsigned short value);
 ```
+
+
+
+
+
+
+#### Set the float value to FirebaseJson object at the specified node path.
+    
+param **`path`** - The relative path that float value to be set.
+
+param **`value`** - The float value to set.
+
+The relative path can be mixed with array index (number placed inside square brackets) and node names 
+e.g. /myRoot/[2]/Sensor1/myData/[3].
+
+```C++
+void set(const String &path, float value);
 
 
 
@@ -924,6 +970,20 @@ return **`instance of an object.`**
 ```C++
 FirebaseJsonArray &add(int value);
 FirebaseJsonArray &add(unsigned short value);
+```
+
+
+
+
+
+#### Add float to FirebaseJsonArray object.
+
+param **`value`** - The float value to add.
+
+return **`instance of an object.`**
+
+```C++
+FirebaseJsonArray &add(float value);
 ```
 
 
@@ -1130,6 +1190,19 @@ void set(int index, unsigned short value);
 
 
 
+#### Set float value to FirebaseJsonArray object at specified index.
+    
+param **`index`** - The array index that float value to be set.
+
+param **`value`** - The float value to set.
+
+```C++
+void set(int index, float value);
+```
+
+
+
+
 
 
 #### Set double value to FirebaseJsonArray object at specified index.
@@ -1254,6 +1327,25 @@ other array indexes or node names e.g. /[2]/myData would get the data from myDat
 void set(const String &path, int value);
 void set(const String &path, unsigned short value);
 ```
+
+
+
+
+
+#### Set float value to FirebaseJsonArray object at specified path.
+    
+param **`path`** - The relative path that float value to be set.
+
+param **`value`** - The float to set.
+
+The relative path must begin with array index (number placed inside square brackets) followed by 
+other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
+
+ ```C++
+void set(const String &path, float value);
+```
+
+
 
 
 
@@ -1401,6 +1493,8 @@ bool getJSON(FirebaseJson &json);
 
 **`intValue`** The int value of parses data.
 
+**`floatValue`** The double value of parses data.
+
 **`doubleValue`** The double value of parses data.
 
 **`boolValue`** The bool value of parses data.
@@ -1421,11 +1515,13 @@ bool getJSON(FirebaseJson &json);
 
 **FirebaseJson::INT = 4**
 
-**FirebaseJson::DOUBLE = 5**
+**FirebaseJson::FLOAT = 5**
 
-**FirebaseJson::BOOL = 6 and**
+**FirebaseJson::DOUBLE = 6**
 
-**FirebaseJson::NULL = 7**
+**FirebaseJson::BOOL = 7 and**
+
+**FirebaseJson::NULL = 8**
 
 **`success`** The success flag of parsing data.
 

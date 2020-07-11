@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.3.4
+ * FirebaseJson, version 2.3.5
  * 
  * The Easiest ESP8266/ESP32 Arduino library for parse, create and edit JSON object using a relative path.
  * 
- * May 10, 2020
+ * July 11, 2020
  * 
  * Features
  * - None recursive operations
@@ -41,6 +41,7 @@
 
 #include <Arduino.h>
 #include <memory>
+#include <vector>
 
 static const char FirebaseJson_STR_1[] PROGMEM = ",";
 static const char FirebaseJson_STR_2[] PROGMEM = "\"";
@@ -116,6 +117,11 @@ public:
     int intValue = 0;
 
     /*
+    The float value of parses data.
+   */
+    float floatValue = 0.0f;
+
+    /*
     The double value of parses data.
    */
     double doubleValue = 0.0;
@@ -164,9 +170,10 @@ public:
         JSON_ARRAY = 2,
         JSON_STRING = 3,
         JSON_INT = 4,
-        JSON_DOUBLE = 5,
-        JSON_BOOL = 6,
-        JSON_NULL = 7
+        JSON_FLOAT = 5,
+        JSON_DOUBLE = 6,
+        JSON_BOOL = 7,
+        JSON_NULL = 8
     } jsonDataType;
 
     typedef enum
@@ -425,31 +432,34 @@ public:
 
     @return boolean status of the operation.
 
-    The FirebaseJsonData object hold the returned data which can be read from the following properties
+    The FirebaseJsonData object holds the returned data which can be read from the following properties.
 
     jsonData.stringValue - contains the returned string.
 
     jsonData.intValue - contains the returned integer value.
 
+    jsonData.floatValue - contains the returned float value.
+
     jsonData.doubleValue - contains the returned double value.
 
     jsonData.boolValue - contains the returned boolean value.
 
-    jsonData.success - used to determine the result of Firebase.get operation.
+    jsonData.success - used to determine the result of the get operation.
 
     jsonData.type - used to determine the type of returned value in string represent 
     the types of value e.g. string, int, double, boolean, array, object, null and undefined.
 
-    jsonData.typeNum - used to determine the type of returned value is an integer as represented by the following value.
+    jsonData.typeNum used to determine the type of returned value is an integer as represented by the following value.
     
-    JSON_UNDEFINED = 0
-    JSON_OBJECT = 1
-    JSON_ARRAY = 2
-    JSON_STRING = 3
-    JSON_INT = 4
-    JSON_DOUBLE = 5
-    JSON_BOOL = 6 and
-    JSON_NULL = 7
+    FirebaseJson::UNDEFINED = 0
+    FirebaseJson::OBJECT = 1
+    FirebaseJson::ARRAY = 2
+    FirebaseJson::STRING = 3
+    FirebaseJson::INT = 4
+    FirebaseJson::FLOAT = 5
+    FirebaseJson::DOUBLE = 6
+    FirebaseJson::BOOL = 7 and
+    FirebaseJson::NULL = 8
 
    */
     bool get(FirebaseJsonData &jsonData, const String &path, bool prettify = false);
@@ -534,6 +544,19 @@ public:
    */
     void set(const String &path, int value);
     void set(const String &path, unsigned short value);
+
+    /*
+    Set the float value to FirebaseJson object at the specified node path.
+    
+    @param path - The relative path that float value to be set.
+
+    @param value - The float value to set.
+
+    The relative path can be mixed with array index (number placed inside square brackets) and node names 
+    e.g. /myRoot/[2]/Sensor1/myData/[3].
+
+   */
+    void set(const String &path, float value);
 
     /*
     Set the double value to FirebaseJson object at the specified node path.
@@ -668,12 +691,14 @@ private:
     void _addString(const std::string &key, const std::string &value);
     void _addArray(const std::string &key, FirebaseJsonArray *arr);
     void _addInt(const std::string &key, int value);
+    void _addFloat(const std::string &key, float value);
     void _addDouble(const std::string &key, double value);
     void _addBool(const std::string &key, bool value);
     void _addNull(const std::string &key);
     void _addJson(const std::string &key, FirebaseJson *json);
     void _setString(const std::string &path, const std::string &value);
     void _setInt(const std::string &path, int value);
+    void _setFloat(const std::string &path, float value);
     void _setDouble(const std::string &path, double value);
     void _setBool(const std::string &path, bool value);
     void _setNull(const std::string &path);
@@ -787,6 +812,16 @@ public:
    */
     FirebaseJsonArray &add(int value);
     FirebaseJsonArray &add(unsigned short value);
+
+    /*
+    Add float to FirebaseJsonArray object.
+
+    @param value - The float value to add.
+
+    @return instance of an object.
+
+   */
+    FirebaseJsonArray &add(float value);
 
     /*
     Add double to FirebaseJsonArray object.
@@ -922,6 +957,16 @@ public:
     void set(int index, unsigned short value);
 
     /*
+    Set float value to FirebaseJsonArray object at specified index.
+    
+    @param index - The array index that float value to be set.
+
+    @param value - The float value to set.
+
+   */
+    void set(int index, float value);
+
+    /*
     Set double value to FirebaseJsonArray object at specified index.
     
     @param index - The array index that double value to be set.
@@ -1011,6 +1056,19 @@ public:
    */
     void set(const String &path, int value);
     void set(const String &path, unsigned short value);
+
+    /*
+    Set float value to FirebaseJsonArray object at specified path.
+    
+    @param path - The relative path that float value to be set.
+
+    @param value - The float to set.
+
+    The relative path must begin with array index (number placed inside square brackets) followed by 
+    other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2.
+
+   */
+    void set(const String &path, float value);
 
     /*
     Set double value to FirebaseJsonArray object at specified path.
@@ -1112,6 +1170,7 @@ private:
 
     void _addString(const std::string &value);
     void _addInt(int value);
+    void _addFloat(float value);
     void _addDouble(double value);
     void _addBool(bool value);
     void _addNull();
@@ -1121,6 +1180,8 @@ private:
     void _setString(const String &path, const std::string &value);
     void _setInt(int index, int value);
     void _setInt(const String &path, int value);
+    void _setFloat(int index, float value);
+    void _setFloat(const String &path, float value);
     void _setDouble(int index, double value);
     void _setDouble(const String &path, double value);
     void _setBool(int index, bool value);
