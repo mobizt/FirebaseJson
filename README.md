@@ -820,7 +820,7 @@ e.g. /myRoot/[2]/Sensor1/myData/[3].
 
 ```C++
 void set(const String &path, float value);
-
+```
 
 
 
