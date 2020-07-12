@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.3.5
+ * FirebaseJson, version 2.3.6
  * 
  * The Easiest ESP8266/ESP32 Arduino library for parse, create and edit JSON object using a relative path.
  * 
- * July 11, 2020
+ * July 12, 2020
  * 
  * Features
  * - None recursive operations
@@ -38,6 +38,7 @@
 
 #ifndef FirebaseJson_CPP
 #define FirebaseJson_CPP
+#define JSMN_STRICT
 
 #include "FirebaseJson.h"
 
@@ -65,6 +66,7 @@ FirebaseJson::FirebaseJson(std::string &data)
 FirebaseJson::~FirebaseJson()
 {
     clear();
+    _topLevelTkType = JSMN_OBJECT;
     _parser.reset();
     _parser = nullptr;
     _finalize();
@@ -132,6 +134,7 @@ FirebaseJson &FirebaseJson::_setJsonData(std::string &data)
 
 FirebaseJson &FirebaseJson::setJsonData(const String &data)
 {
+    _topLevelTkType = JSMN_OBJECT;
     if (data.length() > 0)
     {
         int p1 = _strpos(data.c_str(), _brk1, 0);
@@ -140,6 +143,26 @@ FirebaseJson &FirebaseJson::setJsonData(const String &data)
             p1 += 1;
         if (p1 != -1 && p2 != -1)
             _rawbuf = data.substring(p1, p2).c_str();
+        else
+        {
+            p1 = _strpos(data.c_str(), _brk3, 0);
+            p2 = _rstrpos(data.c_str(), _brk4, data.length() - 1);
+            if (p1 != -1)
+                p1 += 1;
+            if (p1 != -1 && p2 != -1)
+            {
+                char *_r = _getPGMString(FirebaseJson_STR_21);
+                _rawbuf = _r;
+                _rawbuf += data.c_str();
+                _delPtr(_r);
+                _topLevelTkType = JSMN_ARRAY;
+            }
+            else
+            {
+                _rawbuf = data.c_str();
+                _topLevelTkType = JSMN_PRIMITIVE;
+            }
+        }
     }
     else
         _rawbuf.clear();
@@ -155,6 +178,7 @@ FirebaseJson &FirebaseJson::clear()
     clearPathTk();
     _tokens.reset();
     _tokens = nullptr;
+    _topLevelTkType = JSMN_OBJECT;
     return *this;
 }
 
@@ -302,7 +326,7 @@ char *FirebaseJson::getFloatString(float value)
 char *FirebaseJson::getIntString(int value)
 {
     char *buf = _newPtr(36);
-    itoa(value, buf, 10);
+    sprintf(buf, "%d", value);
     return buf;
 }
 
@@ -358,17 +382,24 @@ void FirebaseJson::_toStdString(std::string &s, bool isJson)
     s.clear();
     size_t bufSize = 10;
     char *buf = _newPtr(bufSize);
-    if (isJson)
-        strcat(buf, _brk1);
-    else
-        strcat(buf, _brk3);
+    if (_topLevelTkType != JSMN_PRIMITIVE)
+    {
+        if (isJson)
+            strcat(buf, _brk1);
+        else
+            strcat(buf, _brk3);
+    }
+
     s += buf;
     s += _rawbuf;
     buf = _newPtr(buf, bufSize);
-    if (isJson)
-        strcat(buf, _brk2);
-    else
-        strcat(buf, _brk4);
+    if (_topLevelTkType != JSMN_PRIMITIVE)
+    {
+        if (isJson)
+            strcat(buf, _brk2);
+        else
+            strcat(buf, _brk4);
+    }
     s += buf;
     _delPtr(buf);
 }
@@ -1860,8 +1891,24 @@ void FirebaseJson::_trim(std::string &str, const std::string &chars)
 void FirebaseJson::_parse(const char *path, PRINT_MODE printMode)
 {
     clearPathTk();
-    _strToTk(path, _pathTk, '/');
+    std::string _path;
+
+    if (_topLevelTkType == JSMN_ARRAY)
+    {
+        char *_root = _getPGMString(FirebaseJson_STR_26);
+        char *_slash = _getPGMString(FirebaseJson_STR_27);
+        _path = _root;
+        _path += _slash;
+        _path += path;
+        _delPtr(_root);
+        _delPtr(_slash);
+    }
+    else
+        _path = path;
+
+    _strToTk(_path.c_str(), _pathTk, '/');
     _fbjs_parse();
+    std::string().swap(_path);
     if (!_jsonData.success)
         return;
     _jsonData.success = false;
@@ -2185,8 +2232,24 @@ void FirebaseJson::_setArray(const std::string &path, FirebaseJsonArray *arr)
 void FirebaseJson::_set(const char *path, const char *data)
 {
     clearPathTk();
-    _strToTk(path, _pathTk, '/');
+    std::string _path;
+
+    if (_topLevelTkType == JSMN_ARRAY)
+    {
+        char *_root = _getPGMString(FirebaseJson_STR_26);
+        char *_slash = _getPGMString(FirebaseJson_STR_27);
+        _path = _root;
+        _path += _slash;
+        _path += path;
+        _delPtr(_root);
+        _delPtr(_slash);
+    }
+    else
+        _path = path;
+
+    _strToTk(_path.c_str(), _pathTk, '/');
     _fbjs_parse();
+    std::string().swap(_path);
     if (!_jsonData.success)
         return;
     _jsonData.success = false;
@@ -2262,10 +2325,27 @@ void FirebaseJson::_set(const char *path, const char *data)
 bool FirebaseJson::remove(const String &path)
 {
     clearPathTk();
-    _strToTk(path.c_str(), _pathTk, '/');
+    std::string _path;
+
+    if (_topLevelTkType == JSMN_ARRAY)
+    {
+        char *_root = _getPGMString(FirebaseJson_STR_26);
+        char *_slash = _getPGMString(FirebaseJson_STR_27);
+        _path = _root;
+        _path += _slash;
+        _path += path.c_str();
+        _delPtr(_root);
+        _delPtr(_slash);
+    }
+    else
+        _path = path.c_str();
+
+    _strToTk(_path.c_str(), _pathTk, '/');
     _fbjs_parse();
+    std::string().swap(_path);
     if (!_jsonData.success)
         return false;
+
     _jsonData.success = false;
     char *nbuf = _newPtr(2);
     int len = _pathTk.size();
@@ -2756,6 +2836,9 @@ int FirebaseJson::fbjs_parse(fbjs_parser *parser, const char *js, size_t len,
             token->type = (c == '{' ? JSMN_OBJECT : JSMN_ARRAY);
             token->start = parser->pos;
             parser->toksuper = parser->toknext - 1;
+            if (parser->pos > 0)
+                if (js[parser->pos - 1] == '{' && js[parser->pos] == '[')
+                    return JSMN_ERROR_INVAL;
             break;
         case '}':
         case ']':
@@ -2873,6 +2956,7 @@ int FirebaseJson::fbjs_parse(fbjs_parser *parser, const char *js, size_t len,
         case 't':
         case 'f':
         case 'n':
+
             /* And they must not be keys of the object */
             if (tokens != NULL && parser->toksuper != -1)
             {
@@ -2887,6 +2971,7 @@ int FirebaseJson::fbjs_parse(fbjs_parser *parser, const char *js, size_t len,
         /* In non-strict mode every unquoted value is a primitive */
         default:
 #endif
+
             r = fbjs_parse_primitive(parser, js, len, tokens, num_tokens);
             if (r < 0)
                 return r;
@@ -3272,7 +3357,7 @@ char *FirebaseJsonArray::getFloatString(float value)
 char *FirebaseJsonArray::getIntString(int value)
 {
     char *buf = _newPtr(36);
-    itoa(value, buf, 10);
+    sprintf(buf, "%d", value);
     return buf;
 }
 
@@ -3344,7 +3429,7 @@ void FirebaseJsonArray::_set2(int index, const char *value, bool isStr)
 {
     char *tmp = _newPtr(50);
     std::string path = _brk3;
-    itoa(index, tmp, 10);
+    sprintf(tmp, "%d", index);
     path += tmp;
     path += _brk4;
     _set(path.c_str(), value, isStr);

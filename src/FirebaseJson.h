@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.3.5
+ * FirebaseJson, version 2.3.6
  * 
  * The Easiest ESP8266/ESP32 Arduino library for parse, create and edit JSON object using a relative path.
  * 
- * July 11, 2020
+ * July 12, 2020
  * 
  * Features
  * - None recursive operations
@@ -645,6 +645,7 @@ private:
     bool _paresRes = false;
     bool _arrReplaced = false;
     bool _arrInserted = false;
+    fbjs_type_t _topLevelTkType = JSMN_OBJECT;
 
     char *_qt = nullptr;
     char *_tab = nullptr;
