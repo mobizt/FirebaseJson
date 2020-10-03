@@ -1049,6 +1049,22 @@ FirebaseJsonArray &add(FirebaseJsonArray &arr);
 
 
 
+
+#### Set JSON array data (JSON array string) to FirebaseJsonArray object.
+
+param **`data`** - The JSON array string.
+
+return **`instance of an object.`**
+
+```C++
+FirebaseJsonArray &setJsonArrayData(const String &data);
+```
+
+
+
+
+
+
 #### Get the array value at specified index from FirebaseJsonArray object.
 
 param **`jsonObj`** - The returning FirebaseJsonData object that holds data at the specified index.
