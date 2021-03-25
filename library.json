@@ -7,6 +7,6 @@
         "url": "https://github.com/mobizt/FirebaseJson"
     },
     "frameworks": "arduino",
-    "platforms": "*",
+    "platforms": ["espressif8266", "espressif32","teensy", "atmelsam","ststm32"],
     "version": "2.3.9"
 }

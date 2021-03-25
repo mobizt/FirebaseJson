@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.9.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.11.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -9,7 +9,7 @@ This makes the library can use with the limited stack memory device.
 
 Able to Parse, create and edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
 
-This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cortext M4) and Teensy 4.x (ARM-Cortext M7) are recommended. 
+This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cortext M4) and Teensy 4.x (ARM-Cortext M7), SAMD, STM32 (128K flash or more) are recommended. 
 
 
 ## Tested Devices
@@ -19,6 +19,8 @@ This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cor
  * Teensy 3.6
  * Teensy 4.0
  * Teensy 4.1
+ * Arduino MKR WiFi 1010
+ * Arduino MKR1000 WIFI
 
 
 ## Features
