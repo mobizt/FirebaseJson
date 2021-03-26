@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.11.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.12.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -102,6 +102,23 @@ Functions `FirebaseJson.iteratorBegin`, `FirebaseJson.iteratorGet` and `Firebase
 
 
 Function `FirebaseJson.clear` is used for clear JSON object contents.
+
+
+Function `FirebaseJson.setBufferLimit` is to set the internal data buffer limit from 32 to 8192 bytes.
+
+
+Function `FirebaseJson.getLastError` is to get fb_json_last_error_t structured data of operation error.
+
+The fb_json_last_error_t data consists of the code (int), function (std::string), line (int) and message (std::string) properties.
+
+The code prop. represents the error number, zero for non error, negative for errors.
+
+The function prop. represents the source file that error issued.
+
+The line prop. represents the line that issued the error in the source file.
+
+The message prop. represents the description of error. 
+
 
 
 Function `FirebaseJsonArray.add` is used for adding the new contents e.g. String, Number (int and double), Boolean, Array and Object to JSON array.
