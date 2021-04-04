@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.3.12
+ * FirebaseJson, version 2.3.13
  * 
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  * 
- * March 26, 2021
+ * April 4, 2021
  * 
  * Features
  * - None recursive operations
@@ -70,6 +70,7 @@ FirebaseJson::~FirebaseJson()
     _parser.reset();
     _parser = nullptr;
     _finalize();
+    delete helper;
 }
 
 void FirebaseJson::_init()
@@ -709,14 +710,14 @@ bool FirebaseJson::_updateTkIndex(uint16_t index, int &depth, const char *search
                     depth = _el[i].depth;
                     len = _el[i].olen;
                     skip = _el[i].skip;
+
                     if (!_parser_info.TkRefOk && _el[i].type == JSMN_OBJECT)
                         ref = _el[i].ref;
                     else if (!_parser_info.TkRefOk && _el[i].type == JSMN_ARRAY && searchIndex > -1)
                         ref = _el[i].ref;
-                    if (i > 0)
-                        _el.erase(_el.begin() + i);
-                    else
-                        _el.erase(_el.begin());
+
+                    _el.erase(_el.begin() + i);
+
                     if (printMode != PRINT_MODE_NONE && !skip)
                     {
                         if (len > 0 && !_parser_info.arrReplaced)
@@ -844,10 +845,9 @@ bool FirebaseJson::_updateTkIndex2(std::string &str, uint16_t index, int &depth,
                         ref = _el[i].ref;
                     else if (!_parser_info.TkRefOk && _el[i].type == JSMN_ARRAY && searchIndex > -1)
                         ref = _el[i].ref;
-                    if (i > 0)
-                        _el.erase(_el.begin() + i);
-                    else
-                        _el.erase(_el.begin());
+
+                    _el.erase(_el.begin() + i);
+
                     if (printMode != PRINT_MODE_NONE && !skip)
                     {
                         if (len > 0)
@@ -908,10 +908,9 @@ bool FirebaseJson::_updateTkIndex3(uint16_t index, int &depth, const char *searc
                         ref = _el[i].ref;
                     else if (!_parser_info.TkRefOk && _el[i].type == JSMN_ARRAY && searchIndex > -1)
                         ref = _el[i].ref;
-                    if (i > 0)
-                        _el.erase(_el.begin() + i);
-                    else
-                        _el.erase(_el.begin());
+
+                    _el.erase(_el.begin() + i);
+
                     if (depth < _parser_info.skipDepth)
                         return false;
                     if (printMode != PRINT_MODE_NONE && skip)
@@ -3124,6 +3123,7 @@ FirebaseJsonArray::~FirebaseJsonArray()
 {
     _finalize();
     std::string().swap(_jbuf);
+    delete helper;
 };
 
 void FirebaseJsonArray::_init()

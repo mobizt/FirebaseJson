@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.12.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.13.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -26,7 +26,7 @@ This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cor
 ## Features
 
 
-* **None recursive parsing**
+* **Non-recursive parsing**
 
 * **Parse, Create and Edit JSON object directly by just specify the relative path to the node element**
 
