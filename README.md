@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v 2.3.13.
+The easiest Arduino library JSON parser, builder and editor, v 2.3.14.
 
 FirebaseJson doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -1566,7 +1566,7 @@ bool getJSON(FirebaseJson &json);
 
 The MIT License (MIT)
 
-Copyright (c) 2019 K. Suwatchai (Mobizt)
+Copyright (c) 2021 K. Suwatchai (Mobizt)
 
 Copyright (c) 2012–2018, Serge Zaitsev, zaitsev.serge@gmail.com
 
