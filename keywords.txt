@@ -29,6 +29,7 @@ remove  KEYWORD2
 size    KEYWORD2
 stringValue KEYWORD2
 intValue    KEYWORD2
+floatValue  KEYWORD2
 doubleValue KEYWORD2
 boolValue   KEYWORD2
 type    KEYWORD2
@@ -36,14 +37,20 @@ typeNum KEYWORD2
 success KEYWORD2
 getArray    KEYWORD2
 getJson KEYWORD2
-setBufferLimit  KEYWORD2
-getLastError    KEYWORD2
+to  KEYWORD2
+readFrom    KEYWORD2
+setFloatDigits  KEYWORD2
+setDoubleDigits KEYWORD2
+search  KEYWORD2
+serializedBufferLength  KEYWORD2
+responseCode    KEYWORD2
+errorPosition   KEYWORD2
 
 ######################################
 # Struct (KEYWORD3)
 ######################################
 
-fb_json_last_error_t    KEYWORD3
+SearchCriteria  KEYWORD3
 
 
 ######################################
