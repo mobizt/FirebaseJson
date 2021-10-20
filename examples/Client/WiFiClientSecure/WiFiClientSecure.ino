@@ -16,6 +16,8 @@
 #include <ESP8266WiFi.h>
 #endif
 
+//This example is for ESP8266 and ESP32
+
 #include <WiFiClientSecure.h>
 
 //Enable WiFiClientSecure library after include the library and before include the FirebaseJson.

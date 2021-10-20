@@ -20,7 +20,7 @@ void setup()
     Serial.println();
 
     //Create, parsing and modify JSON object and JSON array
-    //FirebaseJSON support Arduino String, PROGMEM, flash string, std::string, char array, string literal, sum of arduino String.
+    //FirebaseJSON supports Arduino String, PROGMEM, flash string, std::string, char array, string literal, and sum of arduino String.
 
     //All functions supported FPSTR, String, std::string, const char* and char array as parameters.
 
@@ -123,7 +123,7 @@ void setup()
             for (size_t i = 0; i < count; i++)
             {
                 FirebaseJson::IteratorValue value = json3.valueAt(i);
-                Serial.printf("Name: %s, Value: %s, Type: %s\n", value.key.c_str(), value.value.c_str(), value.type == FirebaseJson::JSON_OBJECT ? "object" : "array");
+                Serial_Printf("Name: %s, Value: %s, Type: %s\n", value.key.c_str(), value.value.c_str(), value.type == FirebaseJson::JSON_OBJECT ? "object" : "array");
             }
 
             Serial.println();
@@ -152,21 +152,21 @@ void setup()
             {
                 arr2.get(result2, i);
                 if (result2.type == "string" /* result2.typeNum == FirebaseJson::JSON_STRING */)
-                    Serial.printf("Array index %d, String Val: %s\n", i, result2.to<String>().c_str());
+                    Serial_Printf("Array index %d, String Val: %s\n", i, result2.to<String>().c_str());
                 else if (result2.type == "int" /* result2.typeNum == FirebaseJson::JSON_INT */)
-                    Serial.printf("Array index %d, Int Val: %d\n", i, result2.to<int>());
+                    Serial_Printf("Array index %d, Int Val: %d\n", i, result2.to<int>());
                 else if (result2.type == "float" /* result2.typeNum == FirebaseJson::JSON_FLOAT */)
-                    Serial.printf("Array index %d, Float Val: %f\n", i, result2.to<float>());
+                    Serial_Printf("Array index %d, Float Val: %f\n", i, result2.to<float>());
                 else if (result2.type == "double" /* result2.typeNum == FirebaseJson::JSON_DOUBLE */)
-                    Serial.printf("Array index %d, Double Val: %f\n", i, result2.to<double>());
+                    Serial_Printf("Array index %d, Double Val: %f\n", i, result2.to<double>());
                 else if (result2.type == "bool" /* result2.typeNum == FirebaseJson::JSON_BOOL */)
-                    Serial.printf("Array index %d, Bool Val: %d\n", i, result2.to<bool>());
+                    Serial_Printf("Array index %d, Bool Val: %d\n", i, result2.to<bool>());
                 else if (result2.type == "object" /* result2.typeNum == FirebaseJson::JSON_OBJECT */)
-                    Serial.printf("Array index %d, Object Val: %s\n", i, result2.to<String>().c_str());
+                    Serial_Printf("Array index %d, Object Val: %s\n", i, result2.to<String>().c_str());
                 else if (result2.type == "array" /* result2.typeNum == FirebaseJson::JSON_ARRAY */)
-                    Serial.printf("Array index %d, Array Val: %s\n", i, result2.to<String>().c_str());
+                    Serial_Printf("Array index %d, Array Val: %s\n", i, result2.to<String>().c_str());
                 else if (result2.type == "null" /* result2.typeNum == FirebaseJson::JSON_NULL */)
-                    Serial.printf("Array index %d, Null Val: %s\n", i, result2.to<String>().c_str());
+                    Serial_Printf("Array index %d, Null Val: %s\n", i, result2.to<String>().c_str());
             }
 
             //Or use the same method as iterate the object
@@ -176,7 +176,7 @@ void setup()
             for (size_t i = 0; i < count; i++)
             {
                 FirebaseJson::IteratorValue value = arr2.valueAt(i);
-                Serial.printf("Name: %s, Value: %s, Type: %s\n", value.key.c_str(), value.value.c_str(), value.type == FirebaseJson::JSON_OBJECT ? "object" : "array");
+                Serial_Printf("Name: %s, Value: %s, Type: %s\n", value.key.c_str(), value.value.c_str(), value.type == FirebaseJson::JSON_OBJECT ? "object" : "array");
             }
             */
         }

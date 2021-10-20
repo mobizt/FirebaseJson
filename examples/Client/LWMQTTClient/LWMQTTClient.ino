@@ -15,6 +15,9 @@
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #endif
+
+//This example is for ESP8266 and ESP32
+
 #include <WiFiClientSecure.h>
 
 //LW MQTT Client

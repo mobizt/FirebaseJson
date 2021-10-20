@@ -16,6 +16,8 @@
 #include <ESP8266WiFi.h>
 #endif
 
+//This example is for ESP8266 and ESP32
+
 #include <WiFiClient.h>
 
 //Enable WiFiClientSecure library after include the library and before include the FirebaseJson.
@@ -89,7 +91,7 @@ void loop()
                 Serial.println("\n\nComplete");
             }
             else
-                Serial.printf(" failed with http code: %d\n", json.responseCode());
+                Serial_Printf(" failed with http code: %d\n", json.responseCode());
         }
         else
             Serial.println(" failed\n");
