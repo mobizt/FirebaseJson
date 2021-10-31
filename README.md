@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v2.5.2
+The easiest Arduino library JSON parser, builder and editor, v2.5.3
 
 FirebaseJson is the easiest JSON manipulation library to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -67,8 +67,26 @@ pio lib install "FirebaseJson"
 Or at PIO Home -> Library -> Registry then search FirebaseJson.
 
 
+## PSRAM support in ESP32
+
+The library supports PSRAM in ESP32 via macro, in file **FBJS_Config.h**
+
+```
+#define FIREBASEJSON_USE_PSRAM
+```
+
+To enable PSRAM in ESP32 module with on-board PSRAM chip, in Arduino IDE
+
+![Enable PSRAM in ESP32](/media/images/ESP32-PSRAM.png)
 
 
+In PlatformIO in VSCode IDE, add the following build_flags in your project's platformio.ini file
+
+```ini
+build_flags = -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+```
+
+*When config the IDE or add the build flags to use PSRAM in the ESP32 dev boards that do not have on-board PSRAM chip, your device will be crashed (reset).
 
 ## Usages
 
