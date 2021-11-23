@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v2.5.3
+The easiest Arduino library JSON parser, builder and editor, v2.6.0
 
 FirebaseJson is the easiest JSON manipulation library to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -67,6 +67,125 @@ pio lib install "FirebaseJson"
 Or at PIO Home -> Library -> Registry then search FirebaseJson.
 
 
+
+## IDE Configuaration for ESP8266 MMU - Adjust the Ratio of ICACHE to IRAM
+
+### Arduino IDE
+
+When you update the ESP8266 Arduino Core SDK to v3.0.0, the memory can be configurable from Arduino IDE board settings.
+
+By default MMU **option 1** was selected, the free Heap can be low and may not suitable for the SSL client usage in this library.
+
+To increase the Heap, choose the MMU **option 3**, 16KB cache + 48KB IRAM and 2nd Heap (shared).
+
+![Arduino IDE config](/media/images/ArduinoIDE.png)
+
+To use external Heap from 1 Mbit SRAM 23LC1024, choose the MMU **option 5**, 128K External 23LC1024.
+
+![MMU VM 128K](/media/images/ESP8266_VM.png)
+
+To use external Heap from PSRAM, choose the MMU **option 6**, 1M External 64 MBit PSRAM.
+
+The connection between SRAM/PSRAM and ESP8266
+
+```
+23LC1024/ESP-PSRAM64                ESP8266
+
+CS (Pin 1)                          GPIO15
+SCK (Pin 6)                         GPIO14
+MOSI (Pin 5)                        GPIO13
+MISO (Pin 2)                        GPIO12
+/HOLD (Pin 7 on 23LC1024 only)      3V3
+Vcc (Pin 8)                         3V3
+Vcc (Pin 4)                         GND
+```
+
+More about MMU settings.
+https://arduino-esp8266.readthedocs.io/en/latest/mmu.html
+
+
+
+
+### PlatformIO IDE
+
+By default the balanced ratio (32KB cache + 32KB IRAM) configuration is used.
+
+To increase the heap, **PIO_FRAMEWORK_ARDUINO_MMU_CACHE16_IRAM48_SECHEAP_SHARED** build flag should be assigned in platformio.ini.
+
+```ini
+[env:d1_mini]
+platform = espressif8266
+build_flags = -D PIO_FRAMEWORK_ARDUINO_MMU_CACHE16_IRAM48_SECHEAP_SHARED
+board = d1_mini
+framework = arduino
+monitor_speed = 115200
+```
+
+And to use external Heap from 1 Mbit SRAM 23LC1024 and 64 Mbit PSRAM, **PIO_FRAMEWORK_ARDUINO_MMU_EXTERNAL_128K** and **PIO_FRAMEWORK_ARDUINO_MMU_EXTERNAL_1024K** build flags should be assigned respectively.
+
+The supportedd MMU build flags in PlatformIO.
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_CACHE16_IRAM48**
+
+   16KB cache + 48KB IRAM (IRAM)
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_CACHE16_IRAM48_SECHEAP_SHARED**
+
+   16KB cache + 48KB IRAM and 2nd Heap (shared)
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_CACHE16_IRAM32_SECHEAP_NOTSHARED**
+
+   16KB cache + 32KB IRAM + 16KB 2nd Heap (not shared)
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_EXTERNAL_128K**
+
+   128K External 23LC1024
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_EXTERNAL_1024K**
+
+   1M External 64 MBit PSRAM
+
+- **PIO_FRAMEWORK_ARDUINO_MMU_CUSTOM**
+
+   Disables default configuration and expects user-specified flags
+
+
+In ESP8266, to use PSRAM/SRAM for internal memory allocation which you can config to use it via [**FBJS_Config.h**](src/FBJS_Config.h) with this macro.
+
+```cpp
+#define FIREBASEJSON_USE_PSRAM
+```
+
+   
+### Test code for MMU
+
+```cpp
+
+#include <Arduino.h>
+#include <umm_malloc/umm_heap_select.h>
+
+void setup() 
+{
+  Serial.begin(115200);
+  HeapSelectIram ephemeral;
+  Serial.printf("IRAM free: %6d bytes\r\n", ESP.getFreeHeap());
+  {
+    HeapSelectDram ephemeral;
+    Serial.printf("DRAM free: %6d bytes\r\n", ESP.getFreeHeap());
+  }
+
+  ESP.setExternalHeap();
+  Serial.printf("External free: %d\n", ESP.getFreeHeap());
+  ESP.resetHeap();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+
+```
+
+
 ## PSRAM support in ESP32
 
 The library supports PSRAM in ESP32 via macro, in file **FBJS_Config.h**
@@ -87,6 +206,13 @@ build_flags = -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
 ```
 
 *When config the IDE or add the build flags to use PSRAM in the ESP32 dev boards that do not have on-board PSRAM chip, your device will be crashed (reset).
+
+
+In ESP32, to use PSRAM/SRAM for internal memory allocation which you can config to use it via [**FBJS_Config.h**](src/FBJS_Config.h) with this macro.
+
+```cpp
+#define FIREBASEJSON_USE_PSRAM
+```
 
 ## Usages
 
