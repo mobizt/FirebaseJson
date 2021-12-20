@@ -1,6 +1,6 @@
 
 /**
- * Mobizt's PSRAM supported String, version 1.1.2
+ * Mobizt's SRAM/PSRAM supported String, version 1.1.2
  * 
  * 
  * November 29, 2021
@@ -8,7 +8,7 @@
  * Changes Log
  * 
  * v1.1.2
- * - Fix substring with zero length return the original string issue.
+ * - Fix substring with zero length returns the original string issue.
  * 
  * v1.1.1
  * - Fix possible ESP8266 code exit without resetting the external heap stack
@@ -54,7 +54,7 @@
 
 #define MB_STRING_MAJOR 1
 #define MB_STRING_MINOR 1
-#define MB_STRING_PATCH 0
+#define MB_STRING_PATCH 2
 
 #if defined(ESP8266) && defined(MMU_EXTERNAL_HEAP) && defined(MB_STRING_USE_PSRAM)
 #include <umm_malloc/umm_malloc.h>

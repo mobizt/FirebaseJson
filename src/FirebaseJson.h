@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.6.1
+ * FirebaseJson, version 2.6.3
  * 
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  * 
- * November 29, 2021
+ * December 20, 2021
  * 
  * Features
  * - Using path to access node element in search style e.g. json.get(result,"a/b/c") 
@@ -500,7 +500,6 @@ namespace FB_JS
         unsigned long dataTime = 0;
     };
 };
-
 class PGM2S
 {
 public:
@@ -561,7 +560,7 @@ private:
         ESP.setExternalHeap();
 #endif
 
-        bool nn = ((p = (void *)malloc(len)) > 0);
+        bool nn = ((p = (void *)malloc(newLen)) > 0);
 
 #if defined(ESP8266_USE_EXTERNAL_HEAP)
         ESP.resetHeap();
@@ -1360,22 +1359,9 @@ protected:
         delay(0);
     }
 
-    void clearS(MBSTRING &s)
-    {
-        s.clear();
-        MBSTRING().swap(s);
-    }
-
     void shrinkS(MBSTRING &s)
     {
-#if defined(ESP32)
         s.shrink_to_fit();
-#else
-        MBSTRING t = s;
-        clearS(s);
-        s = t;
-        clearS(t);
-#endif
     }
 
     void delP(void *ptr)
@@ -1585,35 +1571,6 @@ protected:
         }
         if (i < strlen(buf) - 1)
             buf[i] = '\0';
-    }
-
-    void storeS(MBSTRING &s, const char *v, bool append)
-    {
-        if (!append)
-            clearS(s);
-#if defined(ESP32)
-        s += v;
-        s.shrink_to_fit();
-#else
-        if (!append)
-            s = v;
-        else
-        {
-            MBSTRING t = s;
-            t += v;
-            clearS(s);
-            s = t;
-            clearS(t);
-        }
-#endif
-    }
-
-    void storeS(MBSTRING &s, char v, bool append)
-    {
-        MBSTRING t;
-        t += v;
-        storeS(s, t.c_str(), append);
-        clearS(t);
     }
 
     inline int ishex(int x)
@@ -2068,7 +2025,7 @@ protected:
 
                                 if (headerEnded)
                                 {
-                                    clearS(buf);
+                                    buf.clear();
                                     //parse header string to get the header field
                                     isHeader = false;
                                     parseRespHeader(header, response);
@@ -2157,7 +2114,7 @@ protected:
 
     void clearSerialData(struct FB_JS::serial_data_t &data)
     {
-        clearS(data.buf);
+        data.buf.clear();
         data.start = -1;
         data.end = -1;
         data.pos = -1;
@@ -2208,7 +2165,7 @@ protected:
                 bool ret = false;
                 if (data.end > data.start)
                 {
-                    storeS(buf, data.buf.c_str(), false);
+                    buf = data.buf.c_str();
                     ret = true;
                 }
 
