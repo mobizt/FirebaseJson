@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v2.6.3
+The easiest Arduino library JSON parser, builder and editor, v2.6.7
 
 FirebaseJson is the easiest JSON manipulation library to parse or deserialize complex or nested JSON objects and arrays. 
 
@@ -9,7 +9,7 @@ The new version of library is now powered by cJSON.
 
 Able to Parse, create and edit the simple or complex (depth nested) JSON object by just specify the relative node/element path.
 
-This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cortext M4) and Teensy 4.x (ARM-Cortext M7), SAMD, STM32 (128K flash or more) are recommended. 
+This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cortext M4) and Teensy 4.x (ARM-Cortext M7), AVR, SAMD, STM32 (128K flash or more) Arduino Nano RP2040 Connect, RaspberryPi Pico are recommended. 
 
 
 ## Tested Devices
@@ -21,6 +21,8 @@ This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cor
  * Teensy 4.1
  * Arduino MKR WiFi 1010
  * Arduino MKR1000 WIFI
+ * STM32F103C
+ * STM32FF407
 
 
 ## Features
@@ -245,30 +247,6 @@ Function `FirebaseJson.get` is used for parsing or deserializee the JSON object 
 The casting from FirebaseJsonData to FirebaseJson and FirebaseJsonArray objects is different, by using `FirebaseJsonData.getJSON(FirebaseJson)` and `FirebaseJsonData.getArray(FirebaseJsonArray)`.
 
 
-Function `FirebaseJson.search` is used for searching the elements in JSON object and array. The search function supports criterias which can be set using FirebaseJson::SearchCriteria data.
-
-The search function returns the number of items or elements found.
-
-The SearchCriteria data consisted of the properties e.g. path, value, depth, endDepth, and searchAll.
-
-The path property is the key name or path to search which can use the wildcard * for path to be any key or name at that depth and so on.
-
-The value property can be used with or without path assignment.
-
-The depth property is begin depth to search, default value is 0.
-
-The endDepth property is the end depth to search, default value is -1 for unlimited end depth.
-
-The searchAll property, when set to true, is to search all occurrences of elements found and search result stores in FirebaseJsonData object will be array of all items found. The actual full path of search can be obtained by `FirebaseJsonData.searchPath` which will be serialized array string of all paths for all elements found from search.
-
-When searchAll property is false (default), the first occurrence will be set to the result which can be any value type.
-
-The search path from `FirebaseJsonData.searchPath` will be string of the element or item full path.
-
-
-The search result will keep in FirebaseJsonData object which later can cast to any type (always be an array in case of searchAll property is true) by using `FirebaseJsonData.to<type>`.
-
-
 Function `FirebaseJson.remove` is used to remove the node and all its children's contents at the defined relative path and node. 
 
 
@@ -299,7 +277,7 @@ Function `FirebaseJsonArray.add` is used for adding the new contents e.g. String
 Function `FirebaseJsonArray.set` is for edit, overwrite, create new (if not exist) contents e.g. String, Number (int and double), Boolean, Array and Object at the defined relative path or defined index of JSON array.
 
 
-Function `FirebaseJsonArray.get` and `FirebaseJsonArray.search`work in the same way as FirebaseJson objects
+Function `FirebaseJsonArray.get` works in the same way as FirebaseJson objects
 
 
 Function `FirebaseJsonArray.remove` is used to remove the array's contents at the defined relative path or defined index of JSON array.
@@ -668,16 +646,49 @@ FirebaseJson &clear();
 
 
 
-#### Set JSON data (Client response) to FirebaseJson object.
+#### Set JSON data via derived Stream object to FirebaseJson object.
     
-param **`client`** The pointer to or instance of Client object.
+param **`stream`** The pointer to or instance of derived Stream class.
 
-return **`instance of an object.`**
+return **`boolean`** status of the operation.
 
 ```C++
-bool readFrom(Client *client);
+bool readFrom(Stream &stream);
 
+bool readFrom(Stream *stream);
+```
+
+
+
+
+
+
+#### Set JSON data via derived Client object to FirebaseJson object.
+    
+param **`client`** The pointer to or instance of derived Client class.
+
+return **`boolean`** status of the operation.
+
+```C++
 bool readFrom(Client &client);
+
+bool readFrom(Client *client);
+```
+
+
+
+
+
+#### Set JSON data via Serial to FirebaseJson object.
+    
+param **`ser`** The Serial object.
+
+param **`ser`** The timeout in millisecond to wait for Serial data to be completed.
+
+return **`boolean`** status of the operation.
+
+```C++
+bool readFrom(<serial> &ser, uint32_t timeoutMS = 5000) ;
 ```
 
 
@@ -685,73 +696,14 @@ bool readFrom(Client &client);
 
 
 
-
-
-#### Set JSON data (WiFiClient response) to FirebaseJson object.
+#### Set JSON data via SdFat's SdFile object to FirebaseJson object.
     
-param **`client`** The pointer to or instance of WiFiClient object.
+param **`sdFatFile`** The SdFat file object.
 
-return **`instance of an object.`**
+return **`boolean`** status of the operation.
 
 ```C++
-bool readFrom(WiFiClient *client);
-
-bool readFrom(WiFiClient &client);
-```
-
-
-
-
-
-
-
-#### Set JSON data (WiFiClientSecure response) to FirebaseJson object.
-    
-param **`client`** The pointer to or instance of WiFiClientSecure object.
-
-return **`instance of an object.`**
-
-```C++
-bool readFrom(WiFiClientSecure *client);
-
-bool readFrom(WiFiClientSecure &client);
-```
-
-
-
-
-
-
-
-
-#### Set JSON data (Seral object) to FirebaseJson object.
-    
-param **`ser`** The HW or SW Serial object.
-
-param **`timeoutMS`** The timeout in millisecond to wait for Serial data to be completed.
-
-return **`instance of an object.`**
-
-```C++
-bool readFrom(HardwareSerial &ser, uint32_t timeoutMS = 5000);
-
-bool readFrom(SoftwareSerial &ser, uint32_t timeoutMS = 5000);
-```
-
-
-
-
-
-
-
-#### Set JSON data (File object) to FirebaseJson object.
-    
-param **`file`** The File object.
-
-return **`instance of an object.`**
-
-```C++
-bool readFrom(fs::File &file);
+bool readFrom(<SdFatFile> &sdFatFile);
 ```
 
 
@@ -867,78 +819,6 @@ FirebaseJson::NULL = 8
  ```C++
  bool get(FirebaseJsonData &result, <string> path, bool prettify = false);
  ```
-
-
-
-
-
-
-
-#### Search element by key or path in FirebaseJsonArray object.
-
-param **`result`** The reference of FirebaseJsonData that holds the result.
-
-param **`criteria`** The FirebaseJson::SearchCriteria data.
-
-param **`prettify`** The text indentation and new line serialization option.
-
-return **`number`** of elements found from search.
-
-The SearchCriteria data has the properties e.g.
-
-**`path`** - The key of path to search.
-
-Path can be wildcard with * in search path and * should use as key in part and do not mix with any character.
-
-**`value`** - The value string to search.
-
-**`depth`** - The begin depth (int) of element to search, default is 0.
-
-**`endDepth`** - The end depth (int) of element to search, default is -1.
-
-**`searchAll`** - The boolean option to search all occurrences of elements.
-
-```C++
-size_t search(SearchCriteria &criteria);
-
-size_t search(FirebaseJsonData &result, SearchCriteria &criteria, bool prettify = false);
-```
-
-
-
-
-
-
-
-
-#### Get the full path to any element in FirebaseJson object.
-
-param **`path`** The key or path to search in to.
-
-param **`searchAll`** Search all occurrences.
-
-return **`full path string`** in case of found.
-
-```C++
-String getPath(T path, bool searchAll = false);
-```
-
-
-
-
-
-
-
-#### Check whether key or path to the child element existed in FirebaseJson object or not.
-
-param **`path`** The key or path of child element check.
-
-return **`boolean`** status indicated the existence of element.
-
-```C++
-bool isMember(T path);
-```
-
 
 
 
@@ -1209,16 +1089,35 @@ FirebaseJsonArray &add(First v, Next... n);
 
 
 
-#### Set JSON data (Client response) to FirebaseJsonArray object.
+#### Set JSON array data via derived Stream object to FirebaseJsonArray object.
     
-param **`client`** The pointer to or instance of Client object.
+param **`stream`** The pointer to or instance of derived Stream class.
 
-return **`instance of an object.`**
+return **`boolean`** status of the operation.
 
 ```C++
-bool readFrom(Client *client);
+bool readFrom(Stream &stream);
 
+bool readFrom(Stream *stream);
+```
+
+
+
+
+
+
+
+
+#### Set JSON data array via derived Client object to FirebaseJsonArray object.
+    
+param **`client`** The pointer to or instance of derived Client class.
+
+return **`boolean`** status of the operation.
+
+```C++
 bool readFrom(Client &client);
+
+bool readFrom(Client *client);
 ```
 
 
@@ -1226,18 +1125,16 @@ bool readFrom(Client &client);
 
 
 
-
-
-#### Set JSON data (WiFiClient response) to FirebaseJsonArray object.
+#### Set JSON array data via Serial to FirebaseJsonArray object.
     
-param **`client`** The pointer to or instance of WiFiClient object.
+param **`ser`** The Serial object.
 
-return **`instance of an object.`**
+param **`ser`** The timeout in millisecond to wait for Serial data to be completed.
+
+return **`boolean`** status of the operation.
 
 ```C++
-bool readFrom(WiFiClient *client);
-
-bool readFrom(WiFiClient &client);
+bool readFrom(<serial> &ser, uint32_t timeoutMS = 5000) ;
 ```
 
 
@@ -1246,54 +1143,16 @@ bool readFrom(WiFiClient &client);
 
 
 
-#### Set JSON data (WiFiClientSecure response) to FirebaseJsonArray object.
+#### Set JSON array data via SdFat's SdFile object to FirebaseJsonArray object.
     
-param **`client`** The pointer to or instance of WiFiClientSecure object.
+param **`sdFatFile`** The SdFat file object.
 
-return **`instance of an object.`**
+return **`boolean`** status of the operation.
 
 ```C++
-bool readFrom(WiFiClientSecure *client);
-
-bool readFrom(WiFiClientSecure &client);
+bool readFrom(<SdFatFile> &sdFatFile);
 ```
 
-
-
-
-
-
-
-
-#### Set JSON data (Seral object) to FirebaseJsonArray object.
-    
-param **`ser`** The HW or SW Serial object.
-
-param **`timeoutMS`** The timeout in millisecond to wait for Serial data to be completed.
-
-return **`instance of an object.`**
-
-```C++
-bool readFrom(HardwareSerial &ser, uint32_t timeoutMS = 5000);
-
-bool readFrom(SoftwareSerial &ser, uint32_t timeoutMS = 5000);
-```
-
-
-
-
-
-
-
-#### Set JSON data (File object) to FirebaseJsonArray object.
-    
-param **`file`** The File object.
-
-return **`instance of an object.`**
-
-```C++
-bool readFrom(fs::File &file);
-```
 
 
 
@@ -1314,77 +1173,6 @@ other array indexes or node names e.g. /[2]/myData would get the data from myDat
 
 ```C++
 bool get(FirebaseJsonData &result, <int or string> index_or_path);
-```
-
-
-
-
-
-
-
-#### Search element by key or path in FirebaseJsonArray object.
-
-param **`result`** The reference of FirebaseJsonData that holds the result.
-
-param **`criteria`** The FirebaseJson::SearchCriteria data.
-
-param **`prettify`** The text indentation and new line serialization option.
-
-return **`number`** of elements found from search.
-
-The SearchCriteria data has the properties e.g.
-
-**`path`** - The key of path to search.
-
-Path can be wildcard with * in search path and * should use as key in part and do not mix with any character.
-
-**`value`** - The value string to search.
-
-**`depth`** - The begin depth (int) of element to search, default is 0.
-
-**`endDepth`** - The end depth (int) of element to search, default is -1.
-
-**`searchAll`** - The boolean option to search all occurrences of elements.
-
-```C++
-size_t search(SearchCriteria &criteria);
-
-size_t search(FirebaseJsonData &result, SearchCriteria &criteria, bool prettify = false);
-```
-
-
-
-
-
-
-
-
-#### Get the full path to any element in FirebaseJsonArray.
-
-param **`path`** The key or path to search in to.
-
-param **`searchAll`** Search all occurrences.
-
-return **`full path string`** in case of found.
-
-```C++
-String getPath(T path, bool searchAll = false);
-```
-
-
-
-
-
-
-
-#### Check whether key or path to the child element existed in FirebaseJsonArray or not.
-
-param **`path`** The key or path of child element check.
-
-return **`boolean`** status indicated the existence of element.
-
-```C++
-bool isMember(T path);
 ```
 
 
@@ -1762,7 +1550,7 @@ e.g. to<String>(), to<int>(), to<bool>()
 
 The MIT License (MIT)
 
-Copyright (c) 2021 K. Suwatchai (Mobizt)
+Copyright (c) 2022 K. Suwatchai (Mobizt)
 
 Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
 

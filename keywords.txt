@@ -42,18 +42,10 @@ readFrom    KEYWORD2
 setFloatDigits  KEYWORD2
 setDoubleDigits KEYWORD2
 payloadLen  KEYWORD2
-search  KEYWORD2
 serializedBufferLength  KEYWORD2
 responseCode    KEYWORD2
 errorPosition   KEYWORD2
-getPath KEYWORD2
-isMember    KEYWORD2
 
-######################################
-# Struct (KEYWORD3)
-######################################
-
-SearchCriteria  KEYWORD3
 
 ######################################
 # Constants (LITERAL1)

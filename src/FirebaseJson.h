@@ -1,13 +1,12 @@
 /*
- * FirebaseJson, version 2.6.3
+ * FirebaseJson, version 2.6.7
  * 
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  * 
- * December 20, 2021
+ * Created February 2, 2022
  * 
  * Features
  * - Using path to access node element in search style e.g. json.get(result,"a/b/c") 
- * - Able to search with key/path and value in JSON object and array
  * - Serializing to writable objects e.g. String, C/C++ string, Client (WiFi and Ethernet), File and Hardware Serial.
  * - Deserializing from const char, char array, string literal and stream e.g. Client (WiFi and Ethernet), File and 
  *   Hardware Serial.
@@ -15,8 +14,7 @@
  * 
  * 
  * The MIT License (MIT)
- * 
- * Copyright (c) 2021 K. Suwatchai (Mobizt)
+ * Copyright (c) 2022 K. Suwatchai (Mobizt)
  * Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
  * 
  * 
@@ -42,82 +40,50 @@
 #define FirebaseJson_H
 
 #if defined __has_include
+#if defined __has_include
 #if __has_include(<wirish.h>)
 #include <wirish.h>
 #undef min
 #undef max
 #endif
 #endif
+#endif
 
 #include <Arduino.h>
+#include <stdio.h>
+#include "MB_List.h"
+
+#if !defined(__AVR__)
 #include <memory>
 #include <vector>
 #include <string>
-#include <stdio.h>
 #include <strings.h>
 #include <functional>
+#include <algorithm>
+#else
+#include <stdlib.h>
+#endif
 
-#if __has_include(<FirebaseFS.h>)
-#include <FirebaseFS.h>
+#if defined __has_include
+#if __has_include(<FBJS_Config.h>)
+#include <FBJS_Config.h>
+#endif
 #endif
 
 #if defined(FIREBASEJSON_USE_PSRAM) || defined(FIREBASE_USE_PSRAM)
 #define MB_STRING_USE_PSRAM
 #endif
+
 #include "MB_String.h"
 
-#ifndef USE_MB_STRING
-#define USE_MB_STRING
-#endif
+using namespace mb_string;
 
-#ifndef MBSTRING
-#define MBSTRING MB_String
-#endif
-
-#ifdef Serial_Printf
-#undef Serial_Printf
-#endif
-
-#if defined(ESP8266) || defined(ESP32)
-#include <FS.h>
-#define FLASH_MCR FPSTR
-#define FILE_SYSTEM fs::File
-#define FBJS_ENABLE_FS
-#define Serial_Printf Serial.printf
-
-#elif defined(ARDUINO_ARCH_SAMD)
-#include <algorithm>
-#include <SPI.h>
-#include "extras/SD/SD.h"
-#define FLASH_MCR PSTR
-#define FILE_SYSTEM File
-#define FBJS_ENABLE_FS
-#define HardwareSerial Serial_
-
-#elif defined(ARDUINO_ARCH_STM32F1) || defined(ARDUINO_ARCH_STM32F4)
-#define FLASH_MCR(s) (s)
-
-#elif defined(TEENSYDUINO)
-#define FILE_SYSTEM File
-#define FLASH_MCR(s) (s)
-#define HardwareSerial usb_serial_class
-#define Serial_Printf Serial.printf
-
-#endif
-
-#if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_STM32F1) || defined(ARDUINO_ARCH_STM32F4)
-#include "extras/print/printf.h"
-
-extern "C" __attribute__((weak)) void _putchar(char c)
-{
-    Serial.print(c);
-}
-
-#define Serial_Printf printf
-
-#endif
-
+#if defined __has_include
+#if __has_include(<Client.h>)
 #include <Client.h>
+#endif
+#endif
+
 
 #ifdef __cplusplus
 extern "C"
@@ -128,50 +94,39 @@ extern "C"
 }
 #endif
 
-#if defined(FBJS_ENABLE_SOFTWARE_SERIAL) || defined(ESP8266)
-#include <SoftwareSerial.h>
-#define FB_JS_INCLUDE_SW_SERIAL
+#define MB_SERIAL_CLASS decltype(Serial)
+
+#ifdef Serial_Printf
+#undef Serial_Printf
 #endif
 
-#ifdef FBJS_ENABLE_WIFI_CLIENT
-#include <WiFiClient.h>
-#define FB_JS_INCLUDE_WIFI_CLIENT
+#if defined(ESP32) && defined(SD_FAT_VERSION)
+#define ESP32_SD_FAT_INCLUDED
+#if defined(SD_FS_FILE)
+#define SD_FAT_FILE SD_FS_FILE
+#else
+#define SD_FAT_FILE SdFile
+#endif
 #endif
 
-#ifdef FBJS_ENABLE_WIFI_CLIENT_SECURE
-#include <WiFiClientSecure.h>
-#define FB_JS_INCLUDE_WIFI_CLIENT_SECURE
+#if defined(ESP8266) || defined(ESP32) || defined(TEENSYDUINO)
+
+#define Serial_Printf Serial.printf
+
+#elif defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_STM32F1) || defined(ARDUINO_ARCH_STM32F4) || defined(__AVR__)
+
+#include "extras/print/printf.h"
+
+extern "C" __attribute__((weak)) void
+_putchar(char c)
+{
+    Serial.print(c);
+}
+
+#define Serial_Printf printf
+
 #endif
 
-#ifdef FBJS_ENABLE_ARDUINO_MQTT
-#include <ArduinoMqttClient.h>
-#define FB_JS_INCLUDE_ARDUINO_MQTT
-#endif
-
-#ifdef FBJS_ENABLE_LW_MQTT
-#include <MQTT.h>
-#define FB_JS_INCLUDE_LW_MQTT
-#endif
-
-#if __has_include(<WiFiClient.h>)
-#include <WiFiClient.h>
-#define FB_JS_INCLUDE_WIFI_CLIENT
-#endif
-
-#if __has_include(<WiFiClientSecure.h>)
-#include <WiFiClientSecure.h>
-#define FB_JS_INCLUDE_WIFI_CLIENT_SECURE
-#endif
-
-#if __has_include(<ArduinoMqttClient.h>)
-#include <ArduinoMqttClient.h>
-#define FB_JS_INCLUDE_ARDUINO_MQTT
-#endif
-
-#if __has_include(<MQTT.h>)
-#include <MQTT.h>
-#define FB_JS_INCLUDE_LW_MQTT
-#endif
 
 /// HTTP codes see RFC7231
 #define FBJS_ERROR_HTTP_CODE_OK 200
@@ -214,8 +169,9 @@ static void *fb_js_malloc(size_t len)
     void *p;
     size_t newLen = getReservedLen(len);
 
-#if defined(BOARD_HAS_PSRAM) && defined(FIREBASEJSON_USE_PSRAM)
-    if ((p = (void *)ps_malloc(newLen)) == 0)
+#if defined(BOARD_HAS_PSRAM) && defined(MB_STRING_USE_PSRAM)
+    p = (void *)ps_malloc(newLen);
+    if (!p)
         return NULL;
 #else
 
@@ -223,7 +179,8 @@ static void *fb_js_malloc(size_t len)
     ESP.setExternalHeap();
 #endif
 
-    bool nn = ((p = (void *)malloc(newLen)) > 0);
+    p = (void *)malloc(newLen);
+    bool nn = p ? true : false;
 
 #if defined(ESP8266_USE_EXTERNAL_HEAP)
     ESP.resetHeap();
@@ -244,7 +201,7 @@ static void fb_js_free(void *ptr)
 static void *fb_js_realloc(void *ptr, size_t sz)
 {
     size_t newLen = getReservedLen(sz);
-#if defined(BOARD_HAS_PSRAM) && defined(FIREBASEJSON_USE_PSRAM)
+#if defined(BOARD_HAS_PSRAM) && defined(MB_STRING_USE_PSRAM)
     ptr = (void *)ps_realloc(ptr, newLen);
 #else
 
@@ -267,208 +224,8 @@ static void *fb_js_realloc(void *ptr, size_t sz)
 
 static MB_JSON_Hooks MB_JSON_hooks __attribute__((used)) = {fb_js_malloc, fb_js_free, fb_js_realloc};
 
-namespace FB_JS
+namespace fb_js
 {
-    template <bool, typename T = void>
-    struct enable_if
-    {
-    };
-    template <typename T>
-    struct enable_if<true, T>
-    {
-        typedef T type;
-    };
-    template <typename T, typename U>
-    struct is_same
-    {
-        static bool const value = false;
-    };
-    template <typename T>
-    struct is_same<T, T>
-    {
-        static bool const value = true;
-    };
-
-    template <typename T>
-    struct is_num_int8
-    {
-        static bool const value = FB_JS::is_same<T, int8_t>::value || FB_JS::is_same<T, signed char>::value;
-    };
-
-    template <typename T>
-    struct is_num_uint8
-    {
-        static bool const value = FB_JS::is_same<T, uint8_t>::value || FB_JS::is_same<T, unsigned char>::value;
-    };
-
-    template <typename T>
-    struct is_num_int16
-    {
-        static bool const value = FB_JS::is_same<T, int16_t>::value || FB_JS::is_same<T, signed short>::value;
-    };
-
-    template <typename T>
-    struct is_num_uint16
-    {
-        static bool const value = FB_JS::is_same<T, uint16_t>::value || FB_JS::is_same<T, unsigned short>::value;
-    };
-
-    template <typename T>
-    struct is_num_int32
-    {
-        static bool const value = FB_JS::is_same<T, signed int>::value || FB_JS::is_same<T, int>::value ||
-                                  FB_JS::is_same<T, int32_t>::value || FB_JS::is_same<T, long>::value ||
-                                  FB_JS::is_same<T, signed long>::value;
-    };
-
-    template <typename T>
-    struct is_num_uint32
-    {
-        static bool const value = FB_JS::is_same<T, unsigned int>::value || FB_JS::is_same<T, uint32_t>::value ||
-                                  FB_JS::is_same<T, unsigned long>::value;
-    };
-
-    template <typename T>
-    struct is_num_int64
-    {
-        static bool const value = FB_JS::is_same<T, int64_t>::value || FB_JS::is_same<T, signed long long>::value;
-    };
-
-    template <typename T>
-    struct is_num_uint64
-    {
-        static bool const value = FB_JS::is_same<T, uint64_t>::value || FB_JS::is_same<T, unsigned long long>::value;
-    };
-
-    template <typename T>
-    struct is_num_neg_int
-    {
-        static bool const value = FB_JS::is_num_int8<T>::value || FB_JS::is_num_int16<T>::value ||
-                                  FB_JS::is_num_int32<T>::value || FB_JS::is_num_int64<T>::value;
-    };
-
-    template <typename T>
-    struct is_num_pos_int
-    {
-        static bool const value = FB_JS::is_num_uint8<T>::value || FB_JS::is_num_uint16<T>::value ||
-                                  FB_JS::is_num_uint32<T>::value || FB_JS::is_num_uint64<T>::value;
-    };
-
-    template <typename T>
-    struct is_num_int
-    {
-        static bool const value = FB_JS::is_num_pos_int<T>::value || FB_JS::is_num_neg_int<T>::value;
-    };
-
-    template <typename T>
-    struct is_num_float
-    {
-        static bool const value = FB_JS::is_same<T, float>::value || FB_JS::is_same<T, double>::value;
-    };
-
-    template <typename T>
-    struct is_bool
-    {
-        static bool const value = FB_JS::is_same<T, bool>::value;
-    };
-
-    template <typename T>
-    struct cs_t
-    {
-        static bool const value = FB_JS::is_same<T, char *>::value;
-    };
-
-    template <typename T>
-    struct ccs_t
-    {
-        static bool const value = FB_JS::is_same<T, const char *>::value;
-    };
-
-    template <typename T>
-    struct as_t
-    {
-        static bool const value = FB_JS::is_same<T, String>::value;
-    };
-
-    template <typename T>
-    struct cas_t
-    {
-        static bool const value = FB_JS::is_same<T, const String>::value;
-    };
-
-    template <typename T>
-    struct ss_t
-    {
-        static bool const value = FB_JS::is_same<T, std::string>::value;
-    };
-
-    template <typename T>
-    struct css_t
-    {
-        static bool const value = FB_JS::is_same<T, const std::string>::value;
-    };
-
-    template <typename T>
-    struct ssh_t
-    {
-        static bool const value = FB_JS::is_same<T, StringSumHelper>::value;
-    };
-
-    template <typename T>
-    struct fs_t
-    {
-        static bool const value = FB_JS::is_same<T, const __FlashStringHelper *>::value;
-    };
-
-    template <typename T>
-    struct mbs_t
-    {
-        static bool const value = FB_JS::is_same<T, MBSTRING>::value;
-    };
-
-    template <typename T>
-    struct cmbs_t
-    {
-        static bool const value = FB_JS::is_same<T, const MBSTRING>::value;
-    };
-
-    template <typename T>
-    struct pgm_t
-    {
-        static bool const value = FB_JS::is_same<T, PGM_P>::value;
-    };
-
-    template <typename T>
-    struct is_const_chars
-    {
-        static bool const value = cs_t<T>::value || ccs_t<T>::value;
-    };
-
-    template <typename T>
-    struct is_arduino_string
-    {
-        static bool const value = as_t<T>::value || cas_t<T>::value;
-    };
-
-    template <typename T>
-    struct is_std_string
-    {
-        static bool const value = ss_t<T>::value || css_t<T>::value;
-    };
-
-    template <typename T>
-    struct is_mb_string
-    {
-        static bool const value = mbs_t<T>::value || cmbs_t<T>::value;
-    };
-
-    template <typename T>
-    struct is_string
-    {
-        static bool const value = is_const_chars<T>::value || is_arduino_string<T>::value ||
-                                  ssh_t<T>::value || fs_t<T>::value ||
-                                  is_std_string<T>::value || is_mb_string<T>::value;
-    };
 
     typedef union
     {
@@ -486,358 +243,19 @@ namespace FB_JS
         int payloadOfs = 0;
         bool isChunkedEnc = false;
         bool noContent = false;
-        MBSTRING location;
-        MBSTRING contentType;
-        MBSTRING connection;
-        MBSTRING transferEnc;
+        MB_String location;
+        MB_String contentType;
+        MB_String connection;
+        MB_String transferEnc;
     };
 
     struct serial_data_t
     {
         int pos = -1, start = -1, end = -1;
         int scnt = 0, ecnt = 0;
-        MBSTRING buf;
+        MB_String buf;
         unsigned long dataTime = 0;
     };
-};
-class PGM2S
-{
-public:
-    PGM2S() { init(1); }
-    PGM2S(PGM_P p) { strP(p); }
-    ~PGM2S() { delP(&buf); }
-    const char *get() const { return buf; }
-
-private:
-    void init(size_t sz)
-    {
-        delP(&buf);
-        buf = (char *)newP(sz + 1);
-    }
-
-    void strP(PGM_P pgm)
-    {
-        size_t len = strlen_P(pgm) + 5;
-        init(len);
-        strcpy_P(buf, pgm);
-        buf[strlen_P(pgm)] = 0;
-    }
-
-    void delP(void *ptr)
-    {
-        void **p = (void **)ptr;
-        if (*p)
-        {
-            free(*p);
-            *p = 0;
-        }
-    }
-
-    size_t getReservedLen(size_t len)
-    {
-        int blen = len + 1;
-
-        int newlen = (blen / 4) * 4;
-
-        if (newlen < blen)
-            newlen += 4;
-
-        return (size_t)newlen;
-    }
-
-    void *newP(size_t len)
-    {
-        void *p;
-        size_t newLen = getReservedLen(len);
-#if defined(BOARD_HAS_PSRAM) && defined(FIREBASEJSON_USE_PSRAM)
-
-        if ((p = (void *)ps_malloc(newLen)) == 0)
-            return NULL;
-
-#else
-
-#if defined(ESP8266_USE_EXTERNAL_HEAP)
-        ESP.setExternalHeap();
-#endif
-
-        bool nn = ((p = (void *)malloc(newLen)) > 0);
-
-#if defined(ESP8266_USE_EXTERNAL_HEAP)
-        ESP.resetHeap();
-#endif
-
-        if (!nn)
-            return NULL;
-
-#endif
-        memset(p, 0, newLen);
-        return p;
-    }
-
-    char *buf = nullptr;
-};
-
-class NUM2S
-{
-public:
-    NUM2S() { nullStr(); }
-    NUM2S(unsigned long long value) { uint64Str(value); }
-    NUM2S(signed long long value) { int64Str(value); }
-    NUM2S(unsigned int value) { uint64Str(value); }
-    NUM2S(unsigned long value) { uint64Str(value); }
-    NUM2S(int value) { int64Str(value); }
-    NUM2S(bool value) { boolStr(value); }
-    NUM2S(float value, int precision = 5) { floatStr(value, precision); }
-    NUM2S(double value, int precision = 9) { doubleStr(value, precision); }
-    ~NUM2S() { delP(&buf); }
-    const char *get() const { return buf; }
-
-private:
-    /*** dtostrf function is taken from 
-     * https://github.com/stm32duino/Arduino_Core_STM32/blob/master/cores/arduino/avr/dtostrf.c
-    */
-
-    /***
-     * dtostrf - Emulation for dtostrf function from avr-libc
-     * Copyright (c) 2013 Arduino.  All rights reserved.
-     * Written by Cristian Maglie <c.maglie@arduino.cc>
-     * This library is free software; you can redistribute it and/or
-     * modify it under the terms of the GNU Lesser General Public
-     * License as published by the Free Software Foundation; either
-     * version 2.1 of the License, or (at your option) any later version.
-     * This library is distributed in the hope that it will be useful,
-     * but WITHOUT ANY WARRANTY; without even the implied warranty of
-     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-     * Lesser General Public License for more details.
-     * You should have received a copy of the GNU Lesser General Public
-     * License along with this library; if not, write to the Free Software
-     * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-    */
-
-    char *dtostrf(double val, signed char width, unsigned char prec, char *sout)
-    {
-        //Commented code is the original version
-        /***
-          char fmt[20];
-          sprintf(fmt, "%%%d.%df", width, prec);
-          sprintf(sout, fmt, val);
-          return sout;
-        */
-
-        // Handle negative numbers
-        uint8_t negative = 0;
-        if (val < 0.0)
-        {
-            negative = 1;
-            val = -val;
-        }
-
-        // Round correctly so that print(1.999, 2) prints as "2.00"
-        double rounding = 0.5;
-        for (int i = 0; i < prec; ++i)
-        {
-            rounding /= 10.0;
-        }
-
-        val += rounding;
-
-        // Extract the integer part of the number
-        unsigned long int_part = (unsigned long)val;
-        double remainder = val - (double)int_part;
-
-        if (prec > 0)
-        {
-            // Extract digits from the remainder
-            unsigned long dec_part = 0;
-            double decade = 1.0;
-            for (int i = 0; i < prec; i++)
-            {
-                decade *= 10.0;
-            }
-            remainder *= decade;
-            dec_part = (int)remainder;
-
-            if (negative)
-            {
-                sprintf(sout, "-%ld.%0*ld", int_part, prec, dec_part);
-            }
-            else
-            {
-                sprintf(sout, "%ld.%0*ld", int_part, prec, dec_part);
-            }
-        }
-        else
-        {
-            if (negative)
-            {
-                sprintf(sout, "-%ld", int_part);
-            }
-            else
-            {
-                sprintf(sout, "%ld", int_part);
-            }
-        }
-        // Handle minimum field width of the output string
-        // width is signed value, negative for left adjustment.
-        // Range -128,127
-
-        char *fmt = (char *)newP(129);
-        unsigned int w = width;
-        if (width < 0)
-        {
-            negative = 1;
-            w = -width;
-        }
-        else
-        {
-            negative = 0;
-        }
-
-        if (strlen(sout) < w)
-        {
-            memset(fmt, ' ', 128);
-            fmt[w - strlen(sout)] = '\0';
-            if (negative == 0)
-            {
-                char *tmp = (char *)newP(strlen(sout) + 1);
-                strcpy(tmp, sout);
-                strcpy(sout, fmt);
-                strcat(sout, tmp);
-                delP(&tmp);
-            }
-            else
-            {
-                // left adjustment
-                strcat(sout, fmt);
-            }
-        }
-
-        delP(&fmt);
-
-        return sout;
-    }
-
-    void init(size_t sz)
-    {
-        delP(&buf);
-        buf = (char *)newP(sz + 1);
-    }
-
-    void delP(void *ptr)
-    {
-        void **p = (void **)ptr;
-        if (*p)
-        {
-            free(*p);
-            *p = 0;
-        }
-    }
-
-    size_t getReservedLen(size_t len)
-    {
-        int blen = len + 1;
-
-        int newlen = (blen / 4) * 4;
-
-        if (newlen < blen)
-            newlen += 4;
-
-        return (size_t)newlen;
-    }
-
-    void *newP(size_t len)
-    {
-        void *p;
-        size_t newLen = getReservedLen(len);
-#if defined(BOARD_HAS_PSRAM) && defined(FIREBASEJSON_USE_PSRAM)
-
-        if ((p = (void *)ps_malloc(newLen)) == 0)
-            return NULL;
-
-#else
-
-#if defined(ESP8266_USE_EXTERNAL_HEAP)
-        ESP.setExternalHeap();
-#endif
-
-        bool nn = ((p = (void *)malloc(newLen)) > 0);
-
-#if defined(ESP8266_USE_EXTERNAL_HEAP)
-        ESP.resetHeap();
-#endif
-
-        if (!nn)
-            return NULL;
-
-#endif
-        memset(p, 0, newLen);
-        return p;
-    }
-
-    char *intStr(int value)
-    {
-        char *t = (char *)newP(36);
-        sprintf(t, (const char *)FLASH_MCR("%d"), value);
-        return t;
-    }
-
-    void int64Str(signed long long value)
-    {
-        init(64);
-        sprintf(buf, (const char *)FLASH_MCR("%lld"), value);
-    }
-
-    void uint64Str(unsigned long long value)
-    {
-        init(64);
-        sprintf(buf, (const char *)FLASH_MCR("%llu"), value);
-    }
-
-    void boolStr(bool value)
-    {
-        init(8);
-        value ? strcpy(buf, (const char *)FLASH_MCR("true")) : strcpy(buf, (const char *)FLASH_MCR("false"));
-    }
-
-    void floatStr(float value, int precision)
-    {
-        init(32);
-        dtostrf(value, (precision + 2), precision, buf);
-        trim();
-    }
-
-    void doubleStr(double value, int precision)
-    {
-        init(64);
-        dtostrf(value, (precision + 2), precision, buf);
-        trim();
-    }
-
-    void nullStr()
-    {
-        init(6);
-        strcpy(buf, (const char *)FLASH_MCR("null"));
-    }
-
-    void trim()
-    {
-        size_t i = strlen(buf) - 1;
-        while (buf[i] == '0' && i > 0)
-        {
-            if (buf[i - 1] == '.')
-            {
-                i--;
-                break;
-            }
-            if (buf[i - 1] != '0')
-                break;
-            i--;
-        }
-        if (i < strlen(buf) - 1)
-            buf[i] = '\0';
-    }
-
-    char *buf = nullptr;
 };
 
 class FirebaseJsonData
@@ -895,48 +313,48 @@ public:
      * This should call after parse or get function.
     */
     template <typename T>
-    auto to() -> typename FB_JS::enable_if<FB_JS::is_num_int<T>::value || FB_JS::is_num_float<T>::value || FB_JS::is_bool<T>::value, T>::type
+    auto to() -> typename MB_ENABLE_IF<is_num_int<T>::value || is_num_float<T>::value || is_bool<T>::value, T>::type
     {
-        if (FB_JS::is_bool<T>::value)
+        if (is_bool<T>::value)
             return iVal.uint32 > 0;
-        else if (FB_JS::is_num_int8<T>::value)
+        else if (is_num_int8<T>::value)
             return iVal.int8;
-        else if (FB_JS::is_num_uint8<T>::value)
+        else if (is_num_uint8<T>::value)
             return iVal.uint8;
-        else if (FB_JS::is_num_int16<T>::value)
+        else if (is_num_int16<T>::value)
             return iVal.int16;
-        else if (FB_JS::is_num_uint16<T>::value)
+        else if (is_num_uint16<T>::value)
             return iVal.uint16;
-        else if (FB_JS::is_num_int32<T>::value)
+        else if (is_num_int32<T>::value)
             return iVal.int32;
-        else if (FB_JS::is_num_uint32<T>::value)
+        else if (is_num_uint32<T>::value)
             return iVal.uint32;
-        else if (FB_JS::is_num_int64<T>::value)
+        else if (is_num_int64<T>::value)
             return iVal.int64;
-        else if (FB_JS::is_num_uint64<T>::value)
+        else if (is_num_uint64<T>::value)
             return iVal.uint64;
-        else if (FB_JS::is_same<T, float>::value)
+        else if (MB_IS_SAME<T, float>::value)
             return fVal.f;
-        else if (FB_JS::is_same<T, double>::value)
+        else if (MB_IS_SAME<T, double>::value)
             return fVal.d;
         else
             return 0;
     }
 
     template <typename T>
-    auto to() -> typename FB_JS::enable_if<FB_JS::is_const_chars<T>::value || FB_JS::is_std_string<T>::value || FB_JS::is_arduino_string<T>::value || FB_JS::is_mb_string<T>::value, T>::type
+    auto to() -> typename MB_ENABLE_IF<is_const_chars<T>::value || is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value, T>::type
     {
         return stringValue.c_str();
     }
 
     template <typename T>
-    auto get(T &json) -> typename FB_JS::enable_if<FB_JS::is_same<T, FirebaseJson>::value>::type
+    auto get(T &json) -> typename MB_ENABLE_IF<MB_IS_SAME<T, FirebaseJson>::value>::type
     {
         getJSON(json);
     }
 
     template <typename T>
-    auto get(T &arr) -> typename FB_JS::enable_if<FB_JS::is_same<T, FirebaseJsonArray>::value>::type
+    auto get(T &arr) -> typename MB_ENABLE_IF<MB_IS_SAME<T, FirebaseJsonArray>::value>::type
     {
         getArray(arr);
     }
@@ -982,11 +400,6 @@ public:
     uint8_t typeNum = 0;
 
     /**
-     * The returning full path of current search.
-    */
-    String searchPath;
-
-    /**
      * The success flag of parsing data.
     */
     bool success = false;
@@ -994,14 +407,14 @@ public:
 private:
     union IVal
     {
-        std::uint64_t uint64;
-        std::int64_t int64;
-        std::uint32_t uint32;
-        std::int32_t int32;
-        std::int16_t int16;
-        std::uint16_t uint16;
-        std::int8_t int8;
-        std::uint8_t uint8;
+        uint64_t uint64;
+        int64_t int64;
+        uint32_t uint32;
+        int32_t int32;
+        int16_t int16;
+        uint16_t uint16;
+        int8_t int8;
+        uint8_t uint8;
     };
 
     struct FVal
@@ -1030,16 +443,16 @@ private:
 
 protected:
     template <typename T>
-    auto getStr(const T &val) -> typename FB_JS::enable_if<FB_JS::is_std_string<T>::value || FB_JS::is_arduino_string<T>::value || FB_JS::is_mb_string<T>::value || FB_JS::is_same<T, StringSumHelper>::value, const char *>::type
+    auto getStr(const T &val) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
     {
         return val.c_str();
     }
 
     template <typename T>
-    auto getStr(T val) -> typename FB_JS::enable_if<FB_JS::is_const_chars<T>::value, const char *>::type { return val; }
+    auto getStr(T val) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type { return val; }
 
     template <typename T>
-    auto getStr(T val) -> typename FB_JS::enable_if<FB_JS::fs_t<T>::value, const char *>::type { return (const char *)val; }
+    auto getStr(T val) -> typename MB_ENABLE_IF<fs_t<T>::value, const char *>::type { return (const char *)val; }
 };
 
 class FirebaseJsonBase
@@ -1064,13 +477,6 @@ private:
         key_status_out_of_range = 3
     };
 
-    typedef enum
-    {
-        search_mode_none = 0,
-        search_mode_once = 1,
-        search_mode_all = 2
-    } fb_json_search_mode;
-
     struct search_result_t
     {
         MB_JSON *parent = NULL;
@@ -1091,20 +497,14 @@ private:
 
     struct iterator_data_t
     {
-        std::vector<struct iterator_result_t> result;
+        MB_VECTOR<struct iterator_result_t> result;
         int buf_offset = 0;
         size_t buf_size = 0;
         int depth = -1;
         int _depth = 0;
-        int searchKeyDepth = -1;
-        bool searchEnable = false;
-        bool searchFinished = false;
-        int matchesCount = 0;
         MB_JSON *parent = NULL;
         MB_JSON *parentArr = NULL;
-        MBSTRING path;
-        std::vector<MBSTRING> *searchKeys = NULL;
-        std::vector<MBSTRING> pathList;
+        MB_String path;
     };
 
     struct fb_js_iterator_value_t
@@ -1115,46 +515,37 @@ private:
         String value;
     };
 
-    struct fb_js_search_criteria_t
-    {
-        int depth = 0;
-        int endDepth = -1;
-        bool searchAll = false;
-        String path;
-        String value;
-    };
-
     FirebaseJsonBase &mClear();
     void mIteratorEnd(bool clearBuf = true);
     bool setRaw(const char *raw);
     void prepareRoot();
     MB_JSON *parse(const char *raw);
-    void searchElements(std::vector<MBSTRING> &keys, MB_JSON *parent, struct search_result_t &r);
+    void searchElements(MB_VECTOR<MB_String> &keys, MB_JSON *parent, struct search_result_t &r);
     MB_JSON *getElement(MB_JSON *parent, const char *key, struct search_result_t &r);
-    void mAdd(std::vector<MBSTRING> keys, MB_JSON **parent, int beginIndex, MB_JSON *value);
-    void makeList(const char *str, std::vector<MBSTRING> &keys, char delim);
-    void clearList(std::vector<MBSTRING> &keys);
+    void mAdd(MB_VECTOR<MB_String> keys, MB_JSON **parent, int beginIndex, MB_JSON *value);
+    void makeList(const char *str, MB_VECTOR<MB_String> &keys, char delim);
+    void clearList(MB_VECTOR<MB_String> &keys);
     bool isArray(MB_JSON *e);
     bool isObject(MB_JSON *e);
     MB_JSON *addArray(MB_JSON *parent, MB_JSON *e, size_t size);
-    void appendArray(std::vector<MBSTRING> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *value);
-    void replaceItem(std::vector<MBSTRING> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *value);
-    void replace(std::vector<MBSTRING> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *item);
+    void appendArray(MB_VECTOR<MB_String> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *value);
+    void replaceItem(MB_VECTOR<MB_String> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *value);
+    void replace(MB_VECTOR<MB_String> &keys, struct search_result_t &r, MB_JSON *parent, MB_JSON *item);
     size_t mIteratorBegin(MB_JSON *parent);
-    size_t mIteratorBegin(MB_JSON *parent, std::vector<MBSTRING> *keys, struct fb_js_search_criteria_t *criteria);
-    void collectResult(MB_JSON *e, const char *key, int arrIndex, struct fb_js_search_criteria_t *criteria);
-    void removeDepthPath();
-    void mCollectIterator(MB_JSON *e, int type, int &arrIndex, struct fb_js_search_criteria_t *criteria);
-    void mIterate(MB_JSON *parent, int &arrIndex, struct fb_js_search_criteria_t *criteria);
-    bool checkKeys(struct fb_js_search_criteria_t *criteria);
+    size_t mIteratorBegin(MB_JSON *parent, MB_VECTOR<MB_String> *keys);
+    void mCollectIterator(MB_JSON *e, int type, int &arrIndex);
+    void mIterate(MB_JSON *parent, int &arrIndex);
     int mIteratorGet(size_t index, int &type, String &key, String &value);
     struct fb_js_iterator_value_t mValueAt(size_t index);
     void toBuf(fb_json_serialize_mode mode);
     bool mReadClient(Client *client);
     bool mReadStream(Stream *s, int timeoutMS);
+#if defined(ESP32_SD_FAT_INCLUDED)
+    bool mReadSdFat(SD_FAT_FILE &file, int timeoutMS);
+#endif
     const char *mRaw();
     bool mRemove(const char *path);
-    void mGetPath(MBSTRING &path, std::vector<MBSTRING> paths, int begin = 0, int end = -1);
+    void mGetPath(MB_String &path, MB_VECTOR<MB_String> paths, int begin = 0, int end = -1);
     size_t mGetSerializedBufferLength(bool prettify);
     void mSetFloatDigits(uint8_t digits);
     void mSetDoubleDigits(uint8_t digits);
@@ -1165,10 +556,9 @@ private:
     void mSetElementType(FirebaseJsonData *result);
     void mSet(const char *path, MB_JSON *value);
     void mCopy(FirebaseJsonBase &other);
-    size_t mSearch(MB_JSON *parent, struct fb_js_search_criteria_t *criteria);
-    size_t mSearch(MB_JSON *parent, FirebaseJsonData *result, struct fb_js_search_criteria_t *criteria, bool prettify = false);
-    size_t mSearch(MB_JSON *parent, const char *path, bool searchAll = false);
-    const char *mGetElementFullPath(MB_JSON *parent, const char *path, bool searchAll = false);
+#if defined(__AVR__)
+    unsigned long long strtoull_alt(const char *s);
+#endif
 
 public:
     enum fb_json_root_type
@@ -1208,24 +598,24 @@ protected:
     uint8_t floatDigits = 5;
     int httpCode = 0;
     int errorPos = -1;
-    struct FB_JS::serial_data_t serData;
+    struct fb_js::serial_data_t serData;
     fb_json_root_type root_type = Root_Type_JSON;
     struct iterator_data_t iterator_data;
     MB_JSON *root = NULL;
     MB_JSON_Hooks *hooks = NULL;
-    MBSTRING buf;
+    MB_String buf;
 
     template <typename T>
-    auto getStr(const T &val) -> typename FB_JS::enable_if<FB_JS::is_std_string<T>::value || FB_JS::is_arduino_string<T>::value || FB_JS::is_mb_string<T>::value || FB_JS::is_same<T, StringSumHelper>::value, const char *>::type
+    auto getStr(const T &val) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
     {
         return val.c_str();
     }
 
     template <typename T>
-    auto getStr(T val) -> typename FB_JS::enable_if<FB_JS::is_const_chars<T>::value, const char *>::type { return val; }
+    auto getStr(T val) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type { return val; }
 
     template <typename T>
-    auto getStr(T val) -> typename FB_JS::enable_if<FB_JS::fs_t<T>::value, const char *>::type { return (const char *)val; }
+    auto getStr(T val) -> typename MB_ENABLE_IF<is_arduino_flash_string_helper<T>::value, const char *>::type { return (const char *)val; }
 
     template <typename T>
     bool toStringPtrHandler(T *ptr, bool prettify)
@@ -1233,7 +623,7 @@ protected:
         if (!root || !ptr)
             return false;
 
-        if (std::is_same<T, char>::value)
+        if (MB_IS_SAME<T, char>::value)
         {
             char *p = prettify ? MB_JSON_Print(root) : MB_JSON_PrintUnformatted(root);
             if (p)
@@ -1247,7 +637,7 @@ protected:
     }
 
     template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, bool>::type
+    auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<is_string<T>::value, bool>::type
     {
         if (!root)
             return false;
@@ -1263,11 +653,7 @@ protected:
     }
 
     template <typename T>
-#ifdef FB_JS_INCLUDE_SW_SERIAL
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, HardwareSerial>::value || FB_JS::is_same<T, SoftwareSerial>::value, bool>::type
-#else
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, HardwareSerial>::value, bool>::type
-#endif
+    auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<MB_IS_SAME<T, MB_SERIAL_CLASS>::value, bool>::type
     {
         char *p = prettify ? MB_JSON_Print(root) : MB_JSON_PrintUnformatted(root);
         if (p)
@@ -1279,58 +665,11 @@ protected:
         return false;
     }
 
-#ifdef FB_JS_INCLUDE_LW_MQTT
-    template <typename T1, typename T2>
-    auto toStringHandler(T1 &out, T2 topic) -> typename FB_JS::enable_if<FB_JS::is_same<T1, MQTTClient>::value && FB_JS::is_string<T2>::value, bool>::type
-    {
-        char *p = MB_JSON_PrintUnformatted(root);
-        if (p)
-        {
-            out.publish(topic, p);
-            MB_JSON_free(p);
-            return true;
-        }
-        return false;
-    }
-#endif
-
-#if defined(FBJS_ENABLE_FS)
     template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, FILE_SYSTEM>::value || FB_JS::is_same<T, File>::value, bool>::type
+    auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<MB_IS_SAME<T, Stream>::value, bool>::type
     {
         return writeHelper(out, prettify);
     }
-#endif
-
-    template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, Client>::value, bool>::type
-    {
-        return writeHelper(out, prettify);
-    }
-
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT)
-    template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, WiFiClient>::value, bool>::type
-    {
-        return writeHelper(out, prettify);
-    }
-#endif
-
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT_SECURE)
-    template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, WiFiClientSecure>::value, bool>::type
-    {
-        return writeHelper(out, prettify);
-    }
-#endif
-
-#if defined(FB_JS_INCLUDE_ARDUINO_MQTT)
-    template <typename T>
-    auto toStringHandler(T &out, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_same<T, MqttClient>::value, bool>::type
-    {
-        return writeHelper(out, prettify);
-    }
-#endif
 
     template <typename T>
     bool writeHelper(T &out, bool prettify)
@@ -1340,16 +679,14 @@ protected:
         if (!root)
             return false;
 
-        if (out)
+        char *p = prettify ? MB_JSON_Print(root) : MB_JSON_PrintUnformatted(root);
+        if (p)
         {
-            char *p = prettify ? MB_JSON_Print(root) : MB_JSON_PrintUnformatted(root);
-            if (p)
-            {
-                ret = out.write((const uint8_t *)p, strlen(p)) == strlen(p);
-                MB_JSON_free(p);
-                return ret;
-            }
+            ret = out.write((const uint8_t *)p, strlen(p)) == strlen(p);
+            MB_JSON_free(p);
+            return ret;
         }
+
         return ret;
     }
 
@@ -1359,7 +696,7 @@ protected:
         delay(0);
     }
 
-    void shrinkS(MBSTRING &s)
+    void shrinkS(MB_String &s)
     {
         s.shrink_to_fit();
     }
@@ -1390,9 +727,10 @@ protected:
     {
         void *p;
         size_t newLen = getReservedLen(len);
-#if defined(BOARD_HAS_PSRAM) && defined(FIREBASEJSON_USE_PSRAM)
+#if defined(BOARD_HAS_PSRAM) && defined(MB_STRING_USE_PSRAM)
 
-        if ((p = (void *)ps_malloc(newLen)) == 0)
+        p = (void *)ps_malloc(newLen);
+        if (!p)
             return NULL;
 
 #else
@@ -1401,7 +739,8 @@ protected:
         ESP.setExternalHeap();
 #endif
 
-        bool nn = ((p = (void *)malloc(newLen)) > 0);
+        p = (void *)malloc(newLen);
+        bool nn = p ? true : false;
 
 #if defined(ESP8266_USE_EXTERNAL_HEAP)
         ESP.resetHeap();
@@ -1536,7 +875,7 @@ protected:
         return -1;
     }
 
-    void substr(MBSTRING &str, const char *s, int offset, size_t len)
+    void substr(MB_String &str, const char *s, int offset, size_t len)
     {
         if (!s)
             return;
@@ -1654,7 +993,7 @@ protected:
         return nullptr;
     }
 
-    void parseRespHeader(const char *buf, struct FB_JS::server_response_data_t &response)
+    void parseRespHeader(const char *buf, struct fb_js::server_response_data_t &response)
     {
         int beginPos = 0, pmax = 0, payloadPos = 0;
 
@@ -1697,7 +1036,7 @@ protected:
             if (tmp)
             {
                 response.transferEnc = tmp;
-                if (strcmp(tmp, (const char *)FLASH_MCR("chunked")) == 0)
+                if (strcmp(tmp, (const char *)MBSTRING_FLASH_MCR("chunked")) == 0)
                     response.isChunkedEnc = true;
                 delP(&tmp);
             }
@@ -1754,7 +1093,7 @@ protected:
         return idx;
     }
 
-    int readLine(Client *stream, MBSTRING &buf)
+    int readLine(Client *stream, MB_String &buf)
     {
         int res = -1;
         char c = 0;
@@ -1857,7 +1196,7 @@ protected:
         return olen;
     }
 
-    int readChunkedData(Client *stream, MBSTRING &out, int &chunkState, int &chunkedSize, int &dataLen)
+    int readChunkedData(Client *stream, MB_String &out, int &chunkState, int &chunkedSize, int &dataLen)
     {
         char *tmp = nullptr;
         int p1 = 0;
@@ -1868,7 +1207,7 @@ protected:
             chunkState = 1;
             chunkedSize = -1;
             dataLen = 0;
-            MBSTRING s;
+            MB_String s;
             int readLen = readLine(stream, s);
             if (readLen)
             {
@@ -1900,7 +1239,7 @@ protected:
 
             if (chunkedSize > -1)
             {
-                MBSTRING s;
+                MB_String s;
                 int readLen = readLine(stream, s);
 
                 if (readLen > 0)
@@ -1931,7 +1270,7 @@ protected:
         return olen;
     }
 
-    int readClient(Client *client, MBSTRING &buf)
+    int readClient(Client *client, MB_String &buf)
     {
         int ret = -1;
 
@@ -1940,7 +1279,7 @@ protected:
         char *header = nullptr;
         bool isHeader = false;
 
-        struct FB_JS::server_response_data_t response;
+        struct fb_js::server_response_data_t response;
 
         int chunkIdx = 0;
         int pChunkIdx = 0;
@@ -2112,7 +1451,7 @@ protected:
         return ret;
     }
 
-    void clearSerialData(struct FB_JS::serial_data_t &data)
+    void clearSerialData(struct fb_js::serial_data_t &data)
     {
         data.buf.clear();
         data.start = -1;
@@ -2123,7 +1462,7 @@ protected:
         data.dataTime = millis();
     }
 
-    bool readStreamChar(int r, struct FB_JS::serial_data_t &data, MBSTRING &buf, bool isJson)
+    bool readStreamChar(int r, struct fb_js::serial_data_t &data, MB_String &buf, bool isJson)
     {
         bool ret = false;
         if (r > -1)
@@ -2180,7 +1519,7 @@ protected:
         return ret;
     }
 
-    bool readStream(Stream *s, struct FB_JS::serial_data_t &data, MBSTRING &buf, bool isJson, int timeoutMS)
+    bool readStream(Stream *s, struct fb_js::serial_data_t &data, MB_String &buf, bool isJson, int timeoutMS)
     {
 
         bool ret = false;
@@ -2209,58 +1548,71 @@ protected:
         return ret;
     }
 
-    Stream *toStream(HardwareSerial *ser)
+#if defined(ESP32_SD_FAT_INCLUDED)
+
+    bool readSdFatFile(SD_FAT_FILE &file, struct fb_js::serial_data_t &data, MB_String &buf, bool isJson, int timeoutMS)
     {
-        return reinterpret_cast<Stream *>(ser);
+
+        bool ret = false;
+
+        if (timeoutMS > -1)
+        {
+            if (millis() - data.dataTime > (unsigned long)timeoutMS)
+                clearSerialData(data);
+        }
+        else
+            clearSerialData(data);
+
+        while (file.available())
+        {
+            idle();
+            int r = file.read();
+            ret = readStreamChar(r, data, buf, isJson);
+            if (ret)
+            {
+                if (timeoutMS == -1)
+                    clearSerialData(data);
+                return true;
+            }
+        }
+
+        return ret;
     }
-#ifdef FB_JS_INCLUDE_SW_SERIAL
-    Stream *toStream(SoftwareSerial *ser)
-    {
-        return reinterpret_cast<Stream *>(ser);
-    }
+
 #endif
+
+    Stream *toStream(MB_SERIAL_CLASS *ser)
+    {
+        return reinterpret_cast<Stream *>(ser);
+    }
 #if defined(FBJS_ENABLE_FS)
-    Stream *toStream(File *file)
+    Stream *toStream(fs::File *file)
     {
         return reinterpret_cast<Stream *>(file);
     }
 #endif
 
-#ifdef FB_JS_INCLUDE_WIFI_CLIENT
-    Client *toClient(WiFiClient *client)
-    {
-        return reinterpret_cast<Client *>(client);
-    }
-#endif
-
-#ifdef FB_JS_INCLUDE_WIFI_CLIENT_SECURE
-    Client *toClient(WiFiClientSecure *client)
-    {
-        return reinterpret_cast<Client *>(client);
-    }
-#endif
-
-    void ltrim(MBSTRING &str, const MBSTRING &chars = " ")
+    void ltrim(MB_String &str, const MB_String &chars = " ")
     {
         size_t pos = str.find_first_not_of(chars);
-        if (pos != MBSTRING::npos)
+        if (pos != MB_String::npos)
             str.erase(0, pos);
     }
 
-    void rtrim(MBSTRING &str, const MBSTRING &chars = " ")
+    void rtrim(MB_String &str, const MB_String &chars = " ")
     {
         size_t pos = str.find_last_not_of(chars);
-        if (pos != MBSTRING::npos)
+        if (pos != MB_String::npos)
             str.erase(pos + 1);
     }
 
-    void trim(MBSTRING &str, const MBSTRING &chars = " ")
+    void trim(MB_String &str, const MB_String &chars = " ")
     {
         ltrim(str, chars);
         rtrim(str, chars);
     }
 
-    bool isArrayKey(int &keyIndex, std::vector<MBSTRING> &keys)
+    bool isArrayKey(int &keyIndex, MB_VECTOR<MB_String> &keys)
     {
         if (keyIndex < (int)keys.size())
             return keys[keyIndex][0] == '[' && keys[keyIndex][keys[keyIndex].length() - 1] == ']';
@@ -2276,7 +1628,7 @@ protected:
             return false;
     }
 
-    int getArrIndex(int &keyIndex, std::vector<MBSTRING> &keys)
+    int getArrIndex(int &keyIndex, MB_VECTOR<MB_String> &keys)
     {
         int res = -1;
         if (keyIndex < (int)keys.size())
@@ -2290,7 +1642,7 @@ protected:
 
     int getArrIndex(const char *key)
     {
-        MBSTRING s = key;
+        MB_String s = key;
         int res = -1;
         res = atoi(s.substr(1, s.length() - 2).c_str());
         if (res < 0)
@@ -2307,7 +1659,6 @@ class FirebaseJsonArray : public FirebaseJsonBase
 
 public:
     typedef struct FirebaseJsonBase::fb_js_iterator_value_t IteratorValue;
-    typedef struct FirebaseJsonBase::fb_js_search_criteria_t SearchCriteria;
 
     FirebaseJsonArray()
     {
@@ -2376,70 +1727,45 @@ public:
     }
 
     /**
-     * Set JSON array data (Client response) to FirebaseJsonArray object.
+     * Set JSON array data via derived Stream object to FirebaseJsonArray object.
      * 
-     * @param client The pointer to or instance of Client class.
+     * @param stream The pointer to or instance of derived Stream class.
      * @return boolean status of the operation.
      * 
     */
-    bool readFrom(Client *client) { return mReadClient(client); }
+    bool readFrom(Stream &stream) { return mReadStream(&stream, -1); }
 
+    bool readFrom(Stream *stream) { return mReadStream(stream, -1); }
+
+    /**
+     * Set JSON array data via derived Client object to FirebaseJsonArray object.
+     * 
+     * @param client The pointer to or instance of derived Client class.
+     * @return boolean status of the operation.
+     * 
+    */
     bool readFrom(Client &client) { return mReadClient(&client); }
 
-    /**
-     * Set JSON array data (WiFiClient response) to FirebaseJsonArray object.
-     * 
-     * @param client The pointer to or instance of WiFiClient object.
-     * @return boolean status of the operation.
-     * 
-    */
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT)
-    bool readFrom(WiFiClient *client)
-    {
-        return mReadClient(toClient(client));
-    }
-
-    bool readFrom(WiFiClient &client) { return mReadClient(&client); }
-#endif
+    bool readFrom(Client *client) { return mReadClient(client); }
 
     /**
-     * Set JSON array data (WiFiClientSecure response) to FirebaseJsonArray object.
-     * 
-     * @param client The pointer to or instance of WiFiClientSecure object.
-     * @return boolean status of the operation.
-    */
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT_SECURE)
-    bool readFrom(WiFiClientSecure *client)
-    {
-        return mReadClient(toClient(client));
-    }
-
-    bool readFrom(WiFiClientSecure &client) { return mReadClient(&client); }
-#endif
-
-    /**
-     * Set JSON array data (Seral object) to FirebaseJsonArray object.
+     * Set JSON array data via Serial to FirebaseJsonArray object.
      * 
      * @param ser The HW or SW Serial object.
      * @param timeoutMS The timeout in millisecond to wait for Serial data to be completed.
      * @return boolean status of the operation.
     */
-    bool readFrom(HardwareSerial &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
-#ifdef FB_JS_INCLUDE_SW_SERIAL
-    bool readFrom(SoftwareSerial &ser, uint32_t timeoutMS = 5000)
-    {
-        return mReadStream(toStream(&ser), (int)timeoutMS);
-    }
-#endif
+    bool readFrom(MB_SERIAL_CLASS &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
 
-#if defined(FBJS_ENABLE_FS)
+
+#if defined(ESP32_SD_FAT_INCLUDED)
     /**
-     * Set JSON array data (File object) to FirebaseJsonArray object.
+     * Set JSON array data via SdFat's SdFile object to FirebaseJsonArray object.
      * 
-     * @param file The File object.
+     * @param sdFatFile The SdFat file object.
      * @return boolean status of the operation.
     */
-    bool readFrom(FILE_SYSTEM &file) { return mReadStream(toStream(&file), -1); }
+    bool readFrom(SD_FAT_FILE &sdFatFile) { return mReadSdFat(sdFatFile, -1); }
 #endif
 
     /**
@@ -2455,49 +1781,6 @@ public:
     */
     template <typename T>
     bool get(FirebaseJsonData &result, T index_or_path, bool prettify = false) { return dataGetHandler(index_or_path, result, prettify); }
-
-    /**
-     * Search element by key or path in FirebaseJsonArray object.
-     * 
-     * @param result The reference of FirebaseJsonData that holds the result.
-     * @param criteria The FirebaseJson::SearchCriteria data.
-     * @param prettify The text indentation and new line serialization option.
-     * @return number of elements found from search.
-     * 
-     * The SearchCriteria data has the properties e.g.
-     * path - The key of path to search.
-     * Path can be wildcard with * in search path and * should use as key in part and do not mix with any character.
-     * value - The value string to search.
-     * depth - The begin depth (int) of element to search, default is 0.
-     * endDepth - The end depth (int) of element to search, default is -1.
-     * searchAll - The boolean option to search all occurrences of elements.
-     *  
-    */
-    size_t search(SearchCriteria &criteria) { return mSearch(root, &criteria); }
-
-    size_t search(FirebaseJsonData &result, SearchCriteria &criteria, bool prettify = false) { return mSearch(root, &result, &criteria, prettify); }
-
-    /**
-     * Search element by key or path in FirebaseJsonArray object.
-     * 
-     * @param path The key or path to search.
-     * @param searchAll Search all occurrences.
-     * @return number of elements found from search.
-     *  
-    */
-    template <typename T>
-    size_t search(T path, bool searchAll = false) { return mSearch(root, getStr(path), searchAll); }
-
-    /**
-     * Get the full path to any element in FirebaseJson object.
-     * 
-     * @param path The key or path to search in to.
-     * @param searchAll Search all occurrences.
-     * @return full path string in case of found.
-     *  
-    */
-    template <typename T>
-    String getPath(T path, bool searchAll = false) { return mGetElementFullPath(root, getStr(path), searchAll); }
 
     /**
      * Check whether key or path to the child element existed in FirebaseJsonArray or not.
@@ -2647,159 +1930,161 @@ private:
     bool mRemoveIdx(int index);
 
     template <typename T>
-    auto dataGetHandler(T arg, FirebaseJsonData &result, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, bool>::type
+    auto dataGetHandler(T arg, FirebaseJsonData &result, bool prettify) -> typename MB_ENABLE_IF<is_string<T>::value, bool>::type
     {
         return mGet(root, &result, getStr(arg), prettify);
     }
 
     template <typename T>
-    auto dataGetHandler(T arg, FirebaseJsonData &result, bool prettify) -> typename FB_JS::enable_if<FB_JS::is_num_int<T>::value, bool>::type
+    auto dataGetHandler(T arg, FirebaseJsonData &result, bool prettify) -> typename MB_ENABLE_IF<is_num_int<T>::value, bool>::type
     {
         return mGetIdx(&result, arg, prettify);
     }
 
     template <typename T>
-    auto dataRemoveHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, bool>::type
+    auto dataRemoveHandler(T arg) -> typename MB_ENABLE_IF<is_string<T>::value, bool>::type
     {
         return mRemove(getStr(arg));
     }
 
     template <typename T>
-    auto dataRemoveHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_num_int<T>::value, bool>::type
+    auto dataRemoveHandler(T arg) -> typename MB_ENABLE_IF<is_num_int<T>::value, bool>::type
     {
         return mRemoveIdx(arg);
     }
 
     template <typename T>
-    auto dataAddHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_bool<T>::value, FirebaseJsonArray &>::type
+    auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<is_bool<T>::value, FirebaseJsonArray &>::type
     {
         nAdd(MB_JSON_CreateBool(arg));
         return *this;
     }
 
     template <typename T>
-    auto dataAddHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_num_int<T>::value, FirebaseJsonArray &>::type
+    auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<is_num_int<T>::value, FirebaseJsonArray &>::type
     {
-        nAdd(MB_JSON_CreateRaw(NUM2S(arg).get()));
+        nAdd(MB_JSON_CreateRaw(num2Str(arg, -1)));
         return *this;
     }
 
     template <typename T>
-    auto dataAddHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_same<T, float>::value, FirebaseJsonArray &>::type
+    auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<MB_IS_SAME<T, float>::value, FirebaseJsonArray &>::type
     {
-        nAdd(MB_JSON_CreateRaw(NUM2S(arg, floatDigits).get()));
+        nAdd(MB_JSON_CreateRaw(num2Str(arg, floatDigits)));
         return *this;
     }
 
     template <typename T>
-    auto dataAddHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_same<T, double>::value, FirebaseJsonArray &>::type
+    auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<MB_IS_SAME<T, double>::value, FirebaseJsonArray &>::type
     {
-        nAdd(MB_JSON_CreateRaw(NUM2S(arg, doubleDigits).get()));
+        nAdd(MB_JSON_CreateRaw(num2Str(arg, doubleDigits)));
         return *this;
     }
 
     template <typename T>
-    auto dataAddHandler(T arg) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, FirebaseJsonArray &>::type
+    auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJsonArray &>::type
     {
         nAdd(MB_JSON_CreateString(getStr(arg)));
         return *this;
     }
 
+#if !defined(__AVR__)
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, std::nullptr_t>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, std::nullptr_t>::value>::type
     {
         mSet(getStr(arg1), MB_JSON_CreateNull());
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_same<T2, std::nullptr_t>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && MB_IS_SAME<T2, std::nullptr_t>::value>::type
     {
         mSetIdx(arg1, MB_JSON_CreateNull);
     }
+#endif
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_bool<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_bool<T2>::value>::type
     {
         mSet(getStr(arg1), MB_JSON_CreateBool(arg2));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_bool<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && is_bool<T2>::value>::type
     {
         mSetIdx(arg1, MB_JSON_CreateBool(arg2));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_num_int<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_num_int<T2>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2).get()));
+        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_num_int<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && is_num_int<T2>::value>::type
     {
-        mSetIdx(arg1, MB_JSON_CreateRaw(NUM2S(arg2).get()));
+        mSetIdx(arg1, MB_JSON_CreateRaw(num2Str(arg2, -1)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, float>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, float>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, floatDigits).get()));
+        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_same<T2, float>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && MB_IS_SAME<T2, float>::value>::type
     {
-        mSetIdx(arg1, MB_JSON_CreateRaw(NUM2S(arg2, floatDigits).get()));
+        mSetIdx(arg1, MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, double>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, double>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, doubleDigits).get()));
+        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_same<T2, double>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && MB_IS_SAME<T2, double>::value>::type
     {
-        mSetIdx(arg1, MB_JSON_CreateRaw(NUM2S(arg2, doubleDigits).get()));
+        mSetIdx(arg1, MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_string<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_string<T2>::value>::type
     {
         mSet(getStr(arg1), MB_JSON_CreateString(getStr(arg2)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_string<T2>::value>::type
+    auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && is_string<T2>::value>::type
     {
         mSetIdx(arg1, MB_JSON_CreateString(getStr(arg2)));
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, FirebaseJson>::value>::type
+    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, FirebaseJson>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
         mSet(getStr(arg1), e);
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_same<T2, FirebaseJson>::value>::type
+    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && MB_IS_SAME<T2, FirebaseJson>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
         mSetIdx(arg1, e);
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, FirebaseJsonArray>::value>::type
+    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, FirebaseJsonArray>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
         mSet(getStr(arg1), e);
     }
 
     template <typename T1, typename T2>
-    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename FB_JS::enable_if<FB_JS::is_num_int<T1>::value && FB_JS::is_same<T2, FirebaseJsonArray>::value>::type
+    auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && MB_IS_SAME<T2, FirebaseJsonArray>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
         mSetIdx(arg1, e);
@@ -2814,7 +2099,6 @@ class FirebaseJson : public FirebaseJsonBase
 public:
     typedef enum FirebaseJsonBase::fb_js_json_data_type jsonDataType;
     typedef struct FirebaseJsonBase::fb_js_iterator_value_t IteratorValue;
-    typedef struct FirebaseJsonBase::fb_js_search_criteria_t SearchCriteria;
 
     FirebaseJson() { this->root_type = Root_Type_JSON; }
 
@@ -2850,68 +2134,39 @@ public:
     bool setJsonData(T data) { return setRaw(getStr(data)); }
 
     /**
-     * Set JSON data (Client response) to FirebaseJson object.
+     * Set JSON data via derived Stream object to FirebaseJson object.
      * 
-     * @param client The pointer to or instance of Client object.
+     * @param stream The pointer to or instance of derived Stream object.
      * @return boolean status of the operation.
    */
-    bool readFrom(Client *client) { return mReadClient(client); }
+    bool readFrom(Stream &stream) { return mReadStream(&stream, -1); }
 
+    /**
+     * Set JSON data via derived Client object to FirebaseJson object.
+     * 
+     * @param client The pointer to or instance of derived Client object.
+     * @return boolean status of the operation.
+   */
     bool readFrom(Client &client) { return mReadClient(&client); }
 
     /**
-     * Set JSON data (WiFiClient response) to FirebaseJson object.
-     * 
-     * @param client The pointer to or instance of WiFiClient object.
-     * @return boolean status of the operation.
-    */
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT)
-    bool readFrom(WiFiClient *client)
-    {
-        return mReadClient(toClient(client));
-    }
-
-    bool readFrom(WiFiClient &client) { return mReadClient(&client); }
-#endif
-
-    /**
-     * Set JSON data (WiFiClientSecure response) to FirebaseJson object.
-     * 
-     * @param client The pointer to or instance of WiFiClientSecure object.
-     * @return boolean status of the operation.
-    */
-#if defined(FB_JS_INCLUDE_WIFI_CLIENT_SECURE)
-    bool readFrom(WiFiClientSecure *client)
-    {
-        return mReadClient(toClient(client));
-    }
-
-    bool readFrom(WiFiClientSecure &client) { return mReadClient(&client); }
-#endif
-
-    /**
-     * Set JSON array data (Seral object) to FirebaseJson object.
+     * Set JSON array data via Serial to FirebaseJson object.
      * 
      * @param ser The HW or SW Serial object.
      * @param timeoutMS The timeout in millisecond to wait for Serial data to be completed.
      * @return boolean status of the operation.
     */
-    bool readFrom(HardwareSerial &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
-#ifdef FB_JS_INCLUDE_SW_SERIAL
-    bool readFrom(SoftwareSerial &ser, uint32_t timeoutMS = 5000)
-    {
-        return mReadStream(toStream(&ser), (int)timeoutMS);
-    }
-#endif
+    bool readFrom(MB_SERIAL_CLASS &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
 
-#if defined(FBJS_ENABLE_FS)
+
+#if defined(ESP32_SD_FAT_INCLUDED)
     /**
-     * Set JSON array data (File object) to FirebaseJson object.
+     * Set JSON data via SdFat's SdFile object to FirebaseJson object.
      * 
-     * @param file The File object.
+     * @param sdFatFile The SdFat's SdFile object.
      * @return boolean status of the operation.
     */
-    bool readFrom(FILE_SYSTEM &file) { return mReadStream(toStream(&file), -1); }
+    bool readFrom(SD_FAT_FILE &sdFatFile) { return mReadSdFat(sdFatFile, -1); }
 #endif
 
     /**
@@ -2942,14 +2197,10 @@ public:
      * Get the FirebaseJson object serialized string.
      * 
      * @param out The writable object e.g. String, std::string, char array, Stream e.g ile, WiFi/Ethernet Client and LWMQTT, that accepts the returning string.
-     * @param topic The MQTT topic (LWMQTT).
      * @param prettify The text indentation and new line serialization option.
     */
-    template <typename T>
-    bool toString(T &out, bool prettify = false) { return toStringHandler(out, prettify); }
 
-    template <typename T1, typename T2>
-    auto toString(T1 &out, T2 topic) -> typename FB_JS::enable_if<FB_JS::is_string<T2>::value, bool>::type { return toStringHandler(out, getStr(topic)); }
+    bool toString(Stream &out, bool prettify = false) { return toStringHandler(out, prettify); }
 
     template <typename T>
     bool toString(T *ptr, bool prettify = false) { return toStringPtrHandler(ptr, prettify); }
@@ -2988,49 +2239,6 @@ public:
     */
     template <typename T>
     bool get(FirebaseJsonData &result, T path, bool prettify = false) { return mGet(root, &result, getStr(path), prettify); }
-
-    /**
-     * Search element by key or path in FirebaseJsonArray object.
-     * 
-     * @param result The reference of FirebaseJsonData that holds the result.
-     * @param criteria The FirebaseJson::SearchCriteria data.
-     * @param prettify The text indentation and new line serialization option.
-     * @return number of elements found from search.
-     * 
-     * The SearchCriteria data has the properties e.g.
-     * path - The key of path to search.
-     * Path can be wildcard with * in search path and * should use as key in part and do not mix with any character.
-     * value - The value string to search.
-     * depth - The begin depth (int) of element to search, default is 0.
-     * endDepth - The end depth (int) of element to search, default is -1.
-     * searchAll - The boolean option to search all occurrences of elements.
-     *  
-    */
-    size_t search(SearchCriteria &criteria) { return mSearch(root, &criteria); }
-
-    size_t search(FirebaseJsonData &result, SearchCriteria &criteria, bool prettify = false) { return mSearch(root, &result, &criteria, prettify); }
-
-    /**
-     * Search element by key or path in FirebaseJson object.
-     * 
-     * @param path The key or path to search.
-     * @param searchAll Search all occurrences.
-     * @return number of elements found from search.
-     *  
-    */
-    template <typename T>
-    size_t search(T path, bool searchAll = false) { return mSearch(root, getStr(path), searchAll); }
-
-    /**
-     * Get the full path to any element in FirebaseJson object.
-     * 
-     * @param path The key or path to search in to.
-     * @param searchAll Search all occurrences.
-     * @return full path string in case of found.
-     *  
-    */
-    template <typename T>
-    String getPath(T path, bool searchAll = false) { return mGetElementFullPath(root, getStr(path), searchAll); }
 
     /**
      * Check whether key or path to the child element existed in FirebaseJson object or not.
@@ -3160,7 +2368,7 @@ private:
     FirebaseJson &nAdd(const char *key, MB_JSON *value);
 
     template <typename T1, typename T2>
-    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_bool<T2>::value, FirebaseJson &>::type
+    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_bool<T2>::value, FirebaseJson &>::type
     {
         if (type == fb_json_func_type_add)
             nAdd(getStr(arg1), MB_JSON_CreateBool(arg2));
@@ -3170,37 +2378,37 @@ private:
     }
 
     template <typename T1, typename T2>
-    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_num_int<T2>::value, FirebaseJson &>::type
+    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_num_int<T2>::value, FirebaseJson &>::type
     {
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2).get()));
+            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2).get()));
+            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
         return *this;
     }
 
     template <typename T1, typename T2>
-    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, float>::value, FirebaseJson &>::type
+    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, float>::value, FirebaseJson &>::type
     {
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, floatDigits).get()));
+            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, floatDigits).get()));
+            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
         return *this;
     }
 
     template <typename T1, typename T2>
-    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_same<T2, double>::value, FirebaseJson &>::type
+    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, double>::value, FirebaseJson &>::type
     {
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, doubleDigits).get()));
+            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(NUM2S(arg2, doubleDigits).get()));
+            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
         return *this;
     }
 
     template <typename T1, typename T2>
-    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T1>::value && FB_JS::is_string<T2>::value, FirebaseJson &>::type
+    auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_string<T2>::value, FirebaseJson &>::type
     {
         if (type == fb_json_func_type_add)
             nAdd(getStr(arg1), MB_JSON_CreateString(getStr(arg2)));
@@ -3210,7 +2418,7 @@ private:
     }
 
     template <typename T>
-    auto dataHandler(T arg, FirebaseJson &json, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, FirebaseJson &>::type
+    auto dataHandler(T arg, FirebaseJson &json, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJson &>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(json.root, true);
         if (type == fb_json_func_type_add)
@@ -3221,7 +2429,7 @@ private:
     }
 
     template <typename T>
-    auto dataHandler(T arg, FirebaseJsonArray &arr, fb_json_func_type_t type) -> typename FB_JS::enable_if<FB_JS::is_string<T>::value, FirebaseJson &>::type
+    auto dataHandler(T arg, FirebaseJsonArray &arr, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJson &>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arr.root, true);
         if (type == fb_json_func_type_add)

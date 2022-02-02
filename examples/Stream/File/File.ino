@@ -16,7 +16,9 @@ FirebaseJson json;
 
 #ifndef DEFAULT_FLASH_FS
 #include <FS.h>
+#if defined(ESP32)
 #include <SPIFFS.h>
+#endif
 #define DEFAULT_FLASH_FS SPIFFS
 #endif
 
