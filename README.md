@@ -1,7 +1,7 @@
 # The Json Parser/Editor Arduino library.
 
 
-The easiest Arduino library JSON parser, builder and editor, v2.6.7
+The easiest Arduino library JSON parser, builder and editor, v2.6.8
 
 FirebaseJson is the easiest JSON manipulation library to parse or deserialize complex or nested JSON objects and arrays. 
 

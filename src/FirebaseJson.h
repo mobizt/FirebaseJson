@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.6.7
+ * FirebaseJson, version 2.6.8
  * 
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  * 
- * Created February 2, 2022
+ * Created February 3, 2022
  * 
  * Features
  * - Using path to access node element in search style e.g. json.get(result,"a/b/c") 
@@ -668,11 +668,11 @@ protected:
     template <typename T>
     auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<MB_IS_SAME<T, Stream>::value, bool>::type
     {
-        return writeHelper(out, prettify);
+        return writeStream(out, prettify);
     }
 
     template <typename T>
-    bool writeHelper(T &out, bool prettify)
+    bool writeStream(T &out, bool prettify)
     {
         bool ret = false;
 
@@ -2205,8 +2205,8 @@ public:
     template <typename T>
     bool toString(T *ptr, bool prettify = false) { return toStringPtrHandler(ptr, prettify); }
 
-    template <typename T1, typename T2>
-    bool toString(T1 *out, T2 topic) { return toStringHandler(out, getStr(topic)); }
+    template <typename T>
+    bool toString(T &out, bool prettify = false) { return toStringHandler(out, prettify); }
 
     /**
      * Get the value from the specified node path in FirebaseJson object.
