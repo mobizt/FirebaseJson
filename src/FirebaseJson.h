@@ -1,51 +1,53 @@
 /*
- * FirebaseJson, version 2.6.8
- * 
+ * FirebaseJson, version 2.6.9
+ *
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
- * 
- * Created February 3, 2022
- * 
+ *
+ * Created February 8, 2022
+ *
  * Features
- * - Using path to access node element in search style e.g. json.get(result,"a/b/c") 
+ * - Using path to access node element in search style e.g. json.get(result,"a/b/c")
  * - Serializing to writable objects e.g. String, C/C++ string, Client (WiFi and Ethernet), File and Hardware Serial.
- * - Deserializing from const char, char array, string literal and stream e.g. Client (WiFi and Ethernet), File and 
+ * - Deserializing from const char, char array, string literal and stream e.g. Client (WiFi and Ethernet), File and
  *   Hardware Serial.
  * - Use managed class, FirebaseJsonData to keep the deserialized result, which can be casted to any primitive data types.
- * 
- * 
+ *
+ *
  * The MIT License (MIT)
  * Copyright (c) 2022 K. Suwatchai (Mobizt)
  * Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
- * 
- * 
+ *
+ *
  * Permission is hereby granted, free of charge, to any person returning a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
  * the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ */
 
 #ifndef FirebaseJson_H
 #define FirebaseJson_H
 
-#if defined __has_include
 #if defined __has_include
 #if __has_include(<wirish.h>)
 #include <wirish.h>
 #undef min
 #undef max
 #endif
+#if __has_include(<FS.h>)
+#include <FS.h>
+#define MB_JSON_FS_H
 #endif
 #endif
 
@@ -83,7 +85,6 @@ using namespace mb_string;
 #include <Client.h>
 #endif
 #endif
-
 
 #ifdef __cplusplus
 extern "C"
@@ -126,7 +127,6 @@ _putchar(char c)
 #define Serial_Printf printf
 
 #endif
-
 
 /// HTTP codes see RFC7231
 #define FBJS_ERROR_HTTP_CODE_OK 200
@@ -270,48 +270,48 @@ public:
 
     /**
      * Get array data as FirebaseJsonArray object from FirebaseJsonData object.
-     * 
+     *
      * @param jsonArray The returning FirebaseJsonArray object.
      * @return bool status for successful operation.
      * This should call after parse or get function.
-    */
+     */
     bool getArray(FirebaseJsonArray &jsonArray);
 
     /**
      * Get array data as FirebaseJsonArray object from string.
-     * 
+     *
      * @param source The JSON array string.
      * @param jsonArray The returning FirebaseJsonArray object.
      * @return bool status for successful operation.
      * This should call after parse or get function.
-    */
+     */
     template <typename T>
     bool getArray(T source, FirebaseJsonArray &jsonArray) { return mGetArray(getStr(source), jsonArray); }
 
     /**
      * Get JSON data as FirebaseJson object from FirebaseJsonData object.
-     * 
+     *
      * @param json The returning FirebaseJson object.
      * @return bool status for successful operation.
      * This should call after parse or get function.
-    */
+     */
     bool getJSON(FirebaseJson &json);
 
     /**
      * Get JSON data as FirebaseJson object from string.
-     * 
+     *
      * @param source The JSON string.
      * @param json The returning FirebaseJson object.
      * @return bool status for successful operation.
      * This should call after parse or get function.
-    */
+     */
     template <typename T>
     bool getJSON(T source, FirebaseJson &json) { return mGetJSON(getStr(source), json); }
 
     /**
      * Get the value by specific type from FirebaseJsonData object.
      * This should call after parse or get function.
-    */
+     */
     template <typename T>
     auto to() -> typename MB_ENABLE_IF<is_num_int<T>::value || is_num_float<T>::value || is_bool<T>::value, T>::type
     {
@@ -361,47 +361,47 @@ public:
 
     /**
      * Clear internal buffer.
-    */
+     */
     void clear();
 
     /**
      * The String value of parses data.
-    */
+     */
     String stringValue;
 
     /**
      * The int value of parses data.
-    */
+     */
     int intValue = 0;
 
     /**
      * The float value of parses data.
-    */
+     */
     float floatValue = 0.0f;
 
     /**
-   * The double value of parses data.
-  */
+     * The double value of parses data.
+     */
     double doubleValue = 0.0;
 
     /**
      * The bool value of parses data.
-    */
+     */
     bool boolValue = false;
 
     /**
      * The type String of parses data.
-    */
+     */
     String type;
 
     /**
      * The type (number) of parses data.
-    */
+     */
     uint8_t typeNum = 0;
 
     /**
      * The success flag of parsing data.
-    */
+     */
     bool success = false;
 
 private:
@@ -670,6 +670,16 @@ protected:
     {
         return writeStream(out, prettify);
     }
+
+#if defined(MB_JSON_FS_H)
+
+    template <typename T>
+    auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<MB_IS_SAME<T, File>::value, bool>::type
+    {
+        return writeStream(out, prettify);
+    }
+
+#endif
 
     template <typename T>
     bool writeStream(T &out, bool prettify)
@@ -1149,7 +1159,7 @@ protected:
                     delP(&tmp);
                 }
 
-                //last chunk
+                // last chunk
                 if (chunkedSize < 1)
                     olen = -1;
             }
@@ -1168,7 +1178,7 @@ protected:
 
                 if (readLen > 0)
                 {
-                    //chunk may contain trailing
+                    // chunk may contain trailing
                     if (dataLen + readLen - 2 < chunkedSize)
                     {
                         dataLen += readLen;
@@ -1227,7 +1237,7 @@ protected:
                     delP(&tmp);
                 }
 
-                //last chunk
+                // last chunk
                 if (chunkedSize < 1)
                     olen = -1;
             }
@@ -1244,7 +1254,7 @@ protected:
 
                 if (readLen > 0)
                 {
-                    //chunk may contain trailing
+                    // chunk may contain trailing
                     if (dataLen + readLen - 2 < chunkedSize)
                     {
                         dataLen += readLen;
@@ -1322,7 +1332,7 @@ protected:
 
                         if (chunkIdx == 0)
                         {
-                            //the first chunk can be http response header
+                            // the first chunk can be http response header
                             header = (char *)newP(chunkBufSize);
                             hstate = 1;
                             int readLen = readLine(client, header, chunkBufSize);
@@ -1333,7 +1343,7 @@ protected:
                             dataTime = millis();
                             if (tmp)
                             {
-                                //http response header with http response code
+                                // http response header with http response code
                                 isHeader = true;
                                 hBufPos = readLen;
                                 response.httpCode = atoi(tmp);
@@ -1345,15 +1355,15 @@ protected:
                         {
                             idle();
                             dataTime = millis();
-                            //the next chunk data can be the remaining http header
+                            // the next chunk data can be the remaining http header
                             if (isHeader)
                             {
-                                //read one line of next header field until the empty header has found
+                                // read one line of next header field until the empty header has found
                                 tmp = (char *)newP(chunkBufSize);
                                 int readLen = readLine(client, tmp, chunkBufSize);
                                 bool headerEnded = false;
 
-                                //check is it the end of http header (\n or \r\n)?
+                                // check is it the end of http header (\n or \r\n)?
                                 if (readLen == 1)
                                     if (tmp[0] == '\r')
                                         headerEnded = true;
@@ -1365,7 +1375,7 @@ protected:
                                 if (headerEnded)
                                 {
                                     buf.clear();
-                                    //parse header string to get the header field
+                                    // parse header string to get the header field
                                     isHeader = false;
                                     parseRespHeader(header, response);
 
@@ -1381,7 +1391,7 @@ protected:
                                 }
                                 else
                                 {
-                                    //accumulate the remaining header field
+                                    // accumulate the remaining header field
                                     memcpy(header + hBufPos, tmp, readLen);
                                     hBufPos += readLen;
                                 }
@@ -1389,15 +1399,15 @@ protected:
                             }
                             else
                             {
-                                //the next chuunk data is the payload
+                                // the next chuunk data is the payload
                                 if (!response.noContent)
                                 {
                                     pChunkIdx++;
                                     pChunk = (char *)newP(chunkBufSize + 1);
                                     if (response.isChunkedEnc)
                                         delay(10);
-                                    //read the avilable data
-                                    //chunk transfer encoding?
+                                    // read the avilable data
+                                    // chunk transfer encoding?
                                     if (response.isChunkedEnc)
                                         availablePayload = readChunkedData(client, pChunk, chunkedDataState, chunkedDataSize, chunkedDataLen, chunkBufSize);
                                     else
@@ -1420,7 +1430,7 @@ protected:
                                 }
                                 else
                                 {
-                                    //read all the rest data
+                                    // read all the rest data
                                     while (client->available() > 0)
                                         client->read();
                                     break;
@@ -1497,7 +1507,7 @@ protected:
             }
 
             if (data.scnt > 0)
-                data.buf += r;
+                data.buf += (char)r;
 
             if (data.scnt == data.ecnt && data.scnt > 0)
             {
@@ -1678,32 +1688,32 @@ public:
 
     /**
      * Set or deserialize the JSON array data (JSON array literal) as FirebaseJsonArray object.
-     * 
+     *
      * @param data The JSON array literal string to set or deserialize.
      * @return boolean status of the operation.
-     * 
+     *
      * Call FirebaseJsonArray.errorPosition to get the error.
-    */
+     */
     template <typename T>
     bool setJsonArrayData(T data) { return setRaw(getStr(data)); }
 
     /**
      * Add null to FirebaseJsonArray object.
-     * 
+     *
      * @return instance of an object.
-    */
+     */
     FirebaseJsonArray &add() { return nAdd(MB_JSON_CreateNull()); }
 
     /**
      * Add value to FirebaseJsonArray object.
-     * 
+     *
      * @param value The value to add.
      * @return instance of an object.
-     * 
+     *
      * The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR),
-     * String, C/C++ std::string, const char*, char array, string literal, all integer and floating point numbers, 
+     * String, C/C++ std::string, const char*, char array, string literal, all integer and floating point numbers,
      * boolean, FirebaseJson object and array.
-    */
+     */
     template <typename T>
     FirebaseJsonArray &add(T value) { return dataAddHandler(value); }
 
@@ -1714,11 +1724,11 @@ public:
     /**
      * Add multiple values to FirebaseJsonArray object.
      * e.g. add("a","b",1,2)
-     * 
+     *
      * @param v The value of any type to add.
      * @param n The consecutive values of any type to add.
      * @return instance of an object.
-    */
+     */
     template <typename First, typename... Next>
     FirebaseJsonArray &add(First v, Next... n)
     {
@@ -1728,119 +1738,118 @@ public:
 
     /**
      * Set JSON array data via derived Stream object to FirebaseJsonArray object.
-     * 
+     *
      * @param stream The pointer to or instance of derived Stream class.
      * @return boolean status of the operation.
-     * 
-    */
+     *
+     */
     bool readFrom(Stream &stream) { return mReadStream(&stream, -1); }
 
     bool readFrom(Stream *stream) { return mReadStream(stream, -1); }
 
     /**
      * Set JSON array data via derived Client object to FirebaseJsonArray object.
-     * 
+     *
      * @param client The pointer to or instance of derived Client class.
      * @return boolean status of the operation.
-     * 
-    */
+     *
+     */
     bool readFrom(Client &client) { return mReadClient(&client); }
 
     bool readFrom(Client *client) { return mReadClient(client); }
 
     /**
      * Set JSON array data via Serial to FirebaseJsonArray object.
-     * 
+     *
      * @param ser The HW or SW Serial object.
      * @param timeoutMS The timeout in millisecond to wait for Serial data to be completed.
      * @return boolean status of the operation.
-    */
+     */
     bool readFrom(MB_SERIAL_CLASS &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
-
 
 #if defined(ESP32_SD_FAT_INCLUDED)
     /**
      * Set JSON array data via SdFat's SdFile object to FirebaseJsonArray object.
-     * 
+     *
      * @param sdFatFile The SdFat file object.
      * @return boolean status of the operation.
-    */
+     */
     bool readFrom(SD_FAT_FILE &sdFatFile) { return mReadSdFat(sdFatFile, -1); }
 #endif
 
     /**
      * Get the array value at the specified index or path from the FirebaseJsonArray object.
-     * 
+     *
      * @param result The reference of FirebaseJsonData object that holds data at the specified index.
      * @param index_or_path Index of data or relative path to data in FirebaseJsonArray object.
      *  @param prettify The text indentation and new line serialization option.
      * @return boolean status of the operation.
-     * 
+     *
      * The relative path must begin with array index (number placed inside square brackets) followed by
      * other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2
-    */
+     */
     template <typename T>
     bool get(FirebaseJsonData &result, T index_or_path, bool prettify = false) { return dataGetHandler(index_or_path, result, prettify); }
 
     /**
      * Check whether key or path to the child element existed in FirebaseJsonArray or not.
-     * 
+     *
      * @param path The key or path of child element check.
      * @return boolean status indicated the existence of element.
-     *  
-    */
+     *
+     */
     template <typename T>
     bool isMember(T path) { return mGet(root, NULL, getStr(path)); }
 
     /**
      * Parse and collect all node/array elements in FirebaseJsonArray object.
      * @return number of child/array elements in FirebaseJson object.
-    */
+     */
     size_t iteratorBegin(const char *data = NULL) { return mIteratorBegin(root); }
 
     /**
      * Get child/array elements from FirebaseJsonArray objects at specified index.
-     * 
+     *
      * @param index The element index to get.
      * @param type The integer which holds the type of data i.e. JSON_OBJECT and JSON_ARR
      * @param key The string which holds the key/key of an object, can return empty String if the data type is an array.
      * @param value The string which holds the value for the element key or array.
      * @return depth of element.
-    */
+     */
     int iteratorGet(size_t index, int &type, String &key, String &value) { return mIteratorGet(index, type, key, value); }
 
     /**
      * Get child/array elements from FirebaseJsonArray objects at specified index.
-     * 
+     *
      * @param index The element index to get.
      * @return IteratorValue struct.
-     * 
+     *
      * This should call after iteratorBegin.
-     * 
+     *
      * The IteratorValue struct contains the following members.
      * int type
      * String key
      * String value
-    */
+     */
     IteratorValue valueAt(size_t index) { return mValueAt(index); }
 
     /**
      * Clear all iterator buffer (should be called since iteratorBegin was called).
-    */
+     */
     void iteratorEnd() { mIteratorEnd(); }
 
     /**
      * Get the length of the array in FirebaseJsonArray object.
      * @return length of the array.
-    */
+     */
     size_t size() { return MB_JSON_GetArraySize(root); }
 
     /**
      * Get the FirebaseJsonArray object serialized string.
-     * 
+     *
      * @param out The object e.g. Serial, String, std::string, char array, Stream, File, Client, that accepts the returning string.
      * @param prettify The text indentation and new line serialization option.
-    */
+     */
     template <typename T>
     bool toString(T &out, bool prettify = false) { return toStringHandler(out, prettify); }
 
@@ -1850,37 +1859,37 @@ public:
     /**
      * Get raw JSON Array
      * @return raw JSON Array string
-    */
+     */
     const char *raw() { return mRaw(); }
 
     /**
      * Get the size of serialized JSON array buffer
      * @param prettify The text indentation and new line serialization option.
-     * @return size in byte of buffer 
-    */
+     * @return size in byte of buffer
+     */
     size_t serializedBufferLength(bool prettify = false) { return mGetSerializedBufferLength(prettify); }
 
     /**
      * Clear all array in FirebaseJsonArray object.
-     * 
+     *
      * @return instance of an object.
-    */
+     */
     FirebaseJsonArray &clear();
 
     /**
      * Set null to FirebaseJsonArray object at specified index or path.
-     * 
+     *
      * @param index_or_path The array index or path that null to be set.
-    */
+     */
     template <typename T>
     void set(T index_or_path) { dataSetHandler(index_or_path, nullptr); }
 
     /**
      * Set String to FirebaseJsonArray object at the specified index.
-     * 
+     *
      * @param index_or_path The array index or path that value to be set.
      * @param value The String to set.
-    */
+     */
     template <typename T1, typename T2>
     void set(T1 index_or_path, T2 value) { dataSetHandler(index_or_path, value); }
     template <typename T>
@@ -1890,13 +1899,13 @@ public:
 
     /**
      * Remove the array value at the specified index or path from the FirebaseJsonArray object.
-     * 
+     *
      * @param index_or_path The array index or relative path to array to be removed.
      * @return bool value represents the successful operation.
-     * 
+     *
      * The relative path must begin with array index (number placed inside square brackets) followed by
      * other array indexes or node names e.g. /[2]/myData would remove the data of myData key inside the array indexes 2.
-    */
+     */
     template <typename T1>
     bool remove(T1 index_or_path) { return dataRemoveHandler(index_or_path); }
 
@@ -1904,23 +1913,23 @@ public:
      * Get the error position at the JSON object literal from parsing.
      * @return the position of error in JSON object literal
      * Return -1 when for no parsing error.
-    */
+     */
     int errorPosition() { return errorPos; }
 
     /**
      * Set the precision for float to JSON Array object
-    */
+     */
     void setFloatDigits(uint8_t digits) { mSetFloatDigits(digits); }
 
     /**
      * Set the precision for double to JSON Array object
-    */
+     */
     void setDoubleDigits(uint8_t digits) { mSetDoubleDigits(digits); }
 
     /**
      * Get http response code of reading JSON data from WiFi/Ethernet Client.
      * @return the response code of reading JSON data from WiFi/Ethernet Client
-    */
+     */
     int responseCode() { return mResponseCode(); }
 
 private:
@@ -2117,75 +2126,74 @@ public:
 
     /**
      * Clear internal buffer of FirebaseJson object.
-     * 
+     *
      * @return instance of an object.
-    */
+     */
     FirebaseJson &clear();
 
     /**
      * Set or deserialize the JSON array data (JSON object literal) as FirebaseJson object.
-     * 
+     *
      * @param data The JSON object literal string to set or deserialize.
      * @return boolean status of the operation.
-     * 
+     *
      * Call FirebaseJson.errorPosition to get the error.
-    */
+     */
     template <typename T>
     bool setJsonData(T data) { return setRaw(getStr(data)); }
 
     /**
      * Set JSON data via derived Stream object to FirebaseJson object.
-     * 
+     *
      * @param stream The pointer to or instance of derived Stream object.
      * @return boolean status of the operation.
-   */
+     */
     bool readFrom(Stream &stream) { return mReadStream(&stream, -1); }
 
     /**
      * Set JSON data via derived Client object to FirebaseJson object.
-     * 
+     *
      * @param client The pointer to or instance of derived Client object.
      * @return boolean status of the operation.
-   */
+     */
     bool readFrom(Client &client) { return mReadClient(&client); }
 
     /**
      * Set JSON array data via Serial to FirebaseJson object.
-     * 
+     *
      * @param ser The HW or SW Serial object.
      * @param timeoutMS The timeout in millisecond to wait for Serial data to be completed.
      * @return boolean status of the operation.
-    */
+     */
     bool readFrom(MB_SERIAL_CLASS &ser, uint32_t timeoutMS = 5000) { return mReadStream(toStream(&ser), (int)timeoutMS); }
-
 
 #if defined(ESP32_SD_FAT_INCLUDED)
     /**
      * Set JSON data via SdFat's SdFile object to FirebaseJson object.
-     * 
+     *
      * @param sdFatFile The SdFat's SdFile object.
      * @return boolean status of the operation.
-    */
+     */
     bool readFrom(SD_FAT_FILE &sdFatFile) { return mReadSdFat(sdFatFile, -1); }
 #endif
 
     /**
      * Add null to FirebaseJson object.
-     * 
+     *
      * @param key The new key string that null to be added.
      * @return instance of an object.
-    */
+     */
     template <typename T>
     FirebaseJson &add(T key) { return nAdd(getStr(key), NULL); }
 
     /**
      * Add value to FirebaseJson object.
-     * 
+     *
      * @param key The new key string that string value to be added.
      * @param value The value for the new specified key.
-     * 
+     *
      * @return instance of an object.
-    */
+     */
     template <typename T1, typename T2>
     FirebaseJson &add(T1 key, T2 value) { return dataHandler(key, value, fb_json_func_type_add); }
     template <typename T>
@@ -2195,10 +2203,10 @@ public:
 
     /**
      * Get the FirebaseJson object serialized string.
-     * 
+     *
      * @param out The writable object e.g. String, std::string, char array, Stream e.g ile, WiFi/Ethernet Client and LWMQTT, that accepts the returning string.
      * @param prettify The text indentation and new line serialization option.
-    */
+     */
 
     bool toString(Stream &out, bool prettify = false) { return toStringHandler(out, prettify); }
 
@@ -2210,12 +2218,12 @@ public:
 
     /**
      * Get the value from the specified node path in FirebaseJson object.
-     * 
+     *
      * @param result The reference of FirebaseJsonData that holds the result.
      * @param path Relative path to the specific node in FirebaseJson object.
      * @param prettify The text indentation and new line serialization option.
      * @return boolean status of the operation.
-     * 
+     *
      * The FirebaseJsonData object holds the returned data which can be read from the following properties.
      * result.stringValue - contains the returned string.
      * result.intValue - contains the returned signed 32-bit integer value.
@@ -2225,7 +2233,7 @@ public:
      * result.success - used to determine the result of the get operation.
      * result.type - used to determine the type of returned value in string represent
      * the types of value e.g. string, int, double, boolean, array, object, null and undefined.
-     * 
+     *
      * result.typeNum used to determine the type of returned value is an integer as represented by the following value.
      * FirebaseJson::UNDEFINED = 0
      * FirebaseJson::OBJECT = 1
@@ -2236,81 +2244,81 @@ public:
      * FirebaseJson::DOUBLE = 6
      * FirebaseJson::BOOL = 7 and
      * FirebaseJson::NULL = 8
-    */
+     */
     template <typename T>
     bool get(FirebaseJsonData &result, T path, bool prettify = false) { return mGet(root, &result, getStr(path), prettify); }
 
     /**
      * Check whether key or path to the child element existed in FirebaseJson object or not.
-     * 
+     *
      * @param path The key or path of child element check.
      * @return boolean status indicated the existence of element.
-     *  
-    */
+     *
+     */
     template <typename T>
     bool isMember(T path) { return mGet(root, NULL, getStr(path)); }
 
     /**
      * Parse and collect all node/array elements in FirebaseJson object.
-     * 
+     *
      * @return number of child/array elements in FirebaseJson object.
-    */
+     */
     size_t iteratorBegin() { return mIteratorBegin(root); }
 
     /**
      * Get child/array elements from FirebaseJson objects at specified index.
-     * 
+     *
      * @param index The element index to get.
      * @param type The integer which holds the type of data i.e. JSON_OBJECT and JSON_ARR
      * @param key The string which holds the key/key of an object, can return empty String if the data type is an array.
      * @param value The string which holds the value for the element key or array.
      * @return depth of element.
-    */
+     */
     int iteratorGet(size_t index, int &type, String &key, String &value) { return mIteratorGet(index, type, key, value); }
 
     /**
      * Get child/array elements from FirebaseJson objects at specified index.
-     * 
+     *
      * @param index The element index to get.
      * @return IteratorValue struct.
-     * 
+     *
      * This should call after iteratorBegin.
-     * 
+     *
      * The IteratorValue struct contains the following members.
      * int type
      * String key
      * String value
-    */
+     */
     IteratorValue valueAt(size_t index) { return mValueAt(index); }
 
     /**
      * Clear all iterator buffer (should be called since iteratorBegin was called).
-    */
+     */
     void iteratorEnd() { mIteratorEnd(); }
 
     /**
      * Set null to FirebaseJson object at the specified node path.
-     * 
+     *
      * @param path The relative path that null to be set.
      * The relative path can be mixed with array index (number placed inside square brackets) and node names
      * e.g. /myRoot/[2]/Sensor1/myData/[3].
-    */
+     */
     template <typename T>
     void set(T key) { mSet(getStr(key), NULL); }
 
     /**
      * Set value to FirebaseJson object at the specified node path.
-     * 
+     *
      * @param path The relative path that string value to be set.
      * @param value The value to set.
-     * 
+     *
      * The relative path can be mixed with array index (number placed inside square brackets) and node names
      * e.g. /myRoot/[2]/Sensor1/myData/[3].
-     * 
-     * The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR), 
+     *
+     * The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR),
      * String, C/C++ std::string, const char*, char array, string literal, all integer and floating point numbers,
      * boolean, FirebaseJson object and array.
-    */
+     */
     template <typename T1, typename T2>
     void set(T1 key, T2 value) { dataHandler(key, value, fb_json_func_type_set); }
     template <typename T>
@@ -2320,48 +2328,48 @@ public:
 
     /**
      * Remove the specified node and its content.
-     * 
+     *
      * @param path The relative path to remove its contents/children.
      * @return bool value represents the success operation.
-    */
+     */
     template <typename T>
     bool remove(T path) { return mRemove(getStr(path)); }
 
     /**
      * Get raw JSON
      * @return raw JSON string
-    */
+     */
     const char *raw() { return mRaw(); }
 
     /**
      * Get the error position at the JSON object literal from parsing.
      * @return the position of error in JSON object literal
      * Return -1 when for no parsing error
-    */
+     */
     int errorPosition() { return errorPos; }
 
     /**
      * Get the size of serialized JSON object buffer
      * @param prettify The text indentation and new line serialization option.
-     * @return size in byte of buffer 
-    */
+     * @return size in byte of buffer
+     */
     size_t serializedBufferLength(bool prettify = false) { return mGetSerializedBufferLength(prettify); }
 
     /**
      * Set the precision for float to JSON object
      * @param digits The number of decimal places.
-    */
+     */
     void setFloatDigits(uint8_t digits) { mSetFloatDigits(digits); }
 
     /**
      * Set the precision for double to JSON object
-    */
+     */
     void setDoubleDigits(uint8_t digits) { mSetDoubleDigits(digits); }
 
     /**
      * Get http response code of reading JSON data from WiFi/Ethernet Client.
      * @return the response code of reading JSON data from WiFi/Ethernet Client
-    */
+     */
     int responseCode() { return mResponseCode(); }
 
 private:
