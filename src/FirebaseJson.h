@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.6.9
+ * FirebaseJson, version 2.6.10
  *
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  *
- * Created February 8, 2022
+ * Created February 11, 2022
  *
  * Features
  * - Using path to access node element in search style e.g. json.get(result,"a/b/c")
@@ -84,6 +84,8 @@ using namespace mb_string;
 #if __has_include(<Client.h>)
 #include <Client.h>
 #endif
+#else
+#include <Client.h>
 #endif
 
 #ifdef __cplusplus
@@ -283,10 +285,17 @@ public:
      * @param source The JSON array string.
      * @param jsonArray The returning FirebaseJsonArray object.
      * @return bool status for successful operation.
-     * This should call after parse or get function.
+     *
+     * @note This should call after parse or get function.
      */
     template <typename T>
-    bool getArray(T source, FirebaseJsonArray &jsonArray) { return mGetArray(getStr(source), jsonArray); }
+    bool getArray(T source, FirebaseJsonArray &jsonArray)
+    {
+        char *s = NULL;
+        bool ret = mGetArray(getStr(source, s), jsonArray);
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Get JSON data as FirebaseJson object from FirebaseJsonData object.
@@ -303,10 +312,17 @@ public:
      * @param source The JSON string.
      * @param json The returning FirebaseJson object.
      * @return bool status for successful operation.
-     * This should call after parse or get function.
+     *
+     * @note This should call after parse or get function.
      */
     template <typename T>
-    bool getJSON(T source, FirebaseJson &json) { return mGetJSON(getStr(source), json); }
+    bool getJSON(T source, FirebaseJson &json)
+    {
+        char *s = NULL;
+        bool ret = mGetJSON(getStr(source, s), json);
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Get the value by specific type from FirebaseJsonData object.
@@ -440,19 +456,32 @@ private:
 
     bool mGetArray(const char *source, FirebaseJsonArray &jsonArray);
     bool mGetJSON(const char *source, FirebaseJson &json);
+    size_t getReservedLen(size_t len);
+    void delP(void *ptr);
+    void *newP(size_t len);
 
-protected:
     template <typename T>
-    auto getStr(const T &val) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
+    auto getStr(const T &val, char *out) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
     {
         return val.c_str();
     }
 
     template <typename T>
-    auto getStr(T val) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type { return val; }
+    auto getStr(T val, char *out) -> typename MB_ENABLE_IF<is_arduino_flash_string_helper<T>::value, const char *>::type
+    {
+        return getStr(reinterpret_cast<PGM_P>(val), out);
+    }
 
     template <typename T>
-    auto getStr(T val) -> typename MB_ENABLE_IF<fs_t<T>::value, const char *>::type { return (const char *)val; }
+    auto getStr(T val, char *out) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type
+    {
+        int len = strlen_P((PGM_P)val) + 1;
+        out = (char *)newP(len);
+        uint8_t *d = reinterpret_cast<uint8_t *>(out);
+        while (len-- > 0)
+            *d++ = pgm_read_byte(val++);
+        return out;
+    }
 };
 
 class FirebaseJsonBase
@@ -606,16 +635,27 @@ protected:
     MB_String buf;
 
     template <typename T>
-    auto getStr(const T &val) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
+    auto getStr(const T &val, char *out) -> typename MB_ENABLE_IF<is_std_string<T>::value || is_arduino_string<T>::value || is_mb_string<T>::value || MB_IS_SAME<T, StringSumHelper>::value, const char *>::type
     {
         return val.c_str();
     }
 
     template <typename T>
-    auto getStr(T val) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type { return val; }
+    auto getStr(T val, char *out) -> typename MB_ENABLE_IF<is_arduino_flash_string_helper<T>::value, const char *>::type
+    {
+        return getStr(reinterpret_cast<PGM_P>(val), out);
+    }
 
     template <typename T>
-    auto getStr(T val) -> typename MB_ENABLE_IF<is_arduino_flash_string_helper<T>::value, const char *>::type { return (const char *)val; }
+    auto getStr(T val, char *out) -> typename MB_ENABLE_IF<is_const_chars<T>::value, const char *>::type
+    {
+        int len = strlen_P((PGM_P)val) + 1;
+        out = (char *)newP(len);
+        uint8_t *d = reinterpret_cast<uint8_t *>(out);
+        while (len-- > 0)
+            *d++ = pgm_read_byte(val++);
+        return out;
+    }
 
     template <typename T>
     bool toStringPtrHandler(T *ptr, bool prettify)
@@ -1679,7 +1719,7 @@ public:
     FirebaseJsonArray(T data)
     {
         this->root_type = Root_Type_JSONArray;
-        setRaw(getStr(data));
+        setJsonArrayData(data);
     }
 
     FirebaseJsonArray &operator=(FirebaseJsonArray other);
@@ -1692,10 +1732,16 @@ public:
      * @param data The JSON array literal string to set or deserialize.
      * @return boolean status of the operation.
      *
-     * Call FirebaseJsonArray.errorPosition to get the error.
+     * @note Call FirebaseJsonArray.errorPosition to get the error.
      */
     template <typename T>
-    bool setJsonArrayData(T data) { return setRaw(getStr(data)); }
+    bool setJsonArrayData(T data)
+    {
+        char *s = NULL;
+        bool ret = setRaw(getStr(data, s));
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Add null to FirebaseJsonArray object.
@@ -1710,7 +1756,7 @@ public:
      * @param value The value to add.
      * @return instance of an object.
      *
-     * The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR),
+     * @note The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR),
      * String, C/C++ std::string, const char*, char array, string literal, all integer and floating point numbers,
      * boolean, FirebaseJson object and array.
      */
@@ -1785,7 +1831,7 @@ public:
      *  @param prettify The text indentation and new line serialization option.
      * @return boolean status of the operation.
      *
-     * The relative path must begin with array index (number placed inside square brackets) followed by
+     * @note The relative path must begin with array index (number placed inside square brackets) followed by
      * other array indexes or node names e.g. /[2]/myData would get the data from myData key inside the array indexes 2
      */
     template <typename T>
@@ -1796,10 +1842,15 @@ public:
      *
      * @param path The key or path of child element check.
      * @return boolean status indicated the existence of element.
-     *
      */
     template <typename T>
-    bool isMember(T path) { return mGet(root, NULL, getStr(path)); }
+    bool isMember(T path)
+    {
+        char *s = NULL;
+        bool ret = mGet(root, NULL, getStr(path, s));
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Parse and collect all node/array elements in FirebaseJsonArray object.
@@ -1885,15 +1936,17 @@ public:
     void set(T index_or_path) { dataSetHandler(index_or_path, nullptr); }
 
     /**
-     * Set String to FirebaseJsonArray object at the specified index.
+     * Set value to FirebaseJsonArray object at the specified index.
      *
      * @param index_or_path The array index or path that value to be set.
-     * @param value The String to set.
+     * @param value The value to set.
      */
     template <typename T1, typename T2>
     void set(T1 index_or_path, T2 value) { dataSetHandler(index_or_path, value); }
+
     template <typename T>
     void set(T index_or_path, FirebaseJson &value) { return dataSetHandler(index_or_path, value); }
+
     template <typename T>
     void set(T index_or_path, FirebaseJsonArray &value) { return dataSetHandler(index_or_path, value); }
 
@@ -1903,7 +1956,7 @@ public:
      * @param index_or_path The array index or relative path to array to be removed.
      * @return bool value represents the successful operation.
      *
-     * The relative path must begin with array index (number placed inside square brackets) followed by
+     * @note The relative path must begin with array index (number placed inside square brackets) followed by
      * other array indexes or node names e.g. /[2]/myData would remove the data of myData key inside the array indexes 2.
      */
     template <typename T1>
@@ -1941,7 +1994,10 @@ private:
     template <typename T>
     auto dataGetHandler(T arg, FirebaseJsonData &result, bool prettify) -> typename MB_ENABLE_IF<is_string<T>::value, bool>::type
     {
-        return mGet(root, &result, getStr(arg), prettify);
+        char *s = NULL;
+        bool ret = mGet(root, &result, getStr(arg, s), prettify);
+        delP(&s);
+        return ret;
     }
 
     template <typename T>
@@ -1953,7 +2009,10 @@ private:
     template <typename T>
     auto dataRemoveHandler(T arg) -> typename MB_ENABLE_IF<is_string<T>::value, bool>::type
     {
-        return mRemove(getStr(arg));
+        char *s = NULL;
+        mRemove(getStr(arg, s));
+        delP(&s);
+        return *this;
     }
 
     template <typename T>
@@ -1993,7 +2052,9 @@ private:
     template <typename T>
     auto dataAddHandler(T arg) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJsonArray &>::type
     {
-        nAdd(MB_JSON_CreateString(getStr(arg)));
+        char *s = NULL;
+        nAdd(MB_JSON_CreateString(getStr(arg, s)));
+        delP(&s);
         return *this;
     }
 
@@ -2001,7 +2062,9 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, std::nullptr_t>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateNull());
+        char *s = NULL;
+        mSet(getStr(arg1, s), MB_JSON_CreateNull());
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2014,7 +2077,9 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_bool<T2>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateBool(arg2));
+        char *s = NULL;
+        mSet(getStr(arg1, s), MB_JSON_CreateBool(arg2));
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2026,7 +2091,9 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_num_int<T2>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
+        char *s = NULL;
+        mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, -1)));
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2038,7 +2105,9 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, float>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
+        char *s = NULL;
+        mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2050,7 +2119,9 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, double>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
+        char *s = NULL;
+        mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2062,20 +2133,28 @@ private:
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && is_string<T2>::value>::type
     {
-        mSet(getStr(arg1), MB_JSON_CreateString(getStr(arg2)));
+        char *s1 = NULL;
+        char *s2 = NULL;
+        mSet(getStr(arg1, s1), MB_JSON_CreateString(getStr(arg2, s2)));
+        delP(&s1);
+        delP(&s2);
     }
 
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 arg2) -> typename MB_ENABLE_IF<is_num_int<T1>::value && is_string<T2>::value>::type
     {
-        mSetIdx(arg1, MB_JSON_CreateString(getStr(arg2)));
+        char *s = NULL;
+        mSetIdx(arg1, MB_JSON_CreateString(getStr(arg2, s)));
+        delP(&s);
     }
 
     template <typename T1, typename T2>
     auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, FirebaseJson>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
-        mSet(getStr(arg1), e);
+        char *s = NULL;
+        mSet(getStr(arg1, s), e);
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2089,7 +2168,9 @@ private:
     auto dataSetHandler(T1 arg1, T2 &arg2) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, FirebaseJsonArray>::value>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arg2.root, true);
-        mSet(getStr(arg1), e);
+        char *s = NULL;
+        mSet(getStr(arg1, s), e);
+        delP(&s);
     }
 
     template <typename T1, typename T2>
@@ -2115,7 +2196,7 @@ public:
     FirebaseJson(T data)
     {
         this->root_type = Root_Type_JSON;
-        setRaw(getStr(data));
+        setJsonData(data);
     }
 
     FirebaseJson &operator=(FirebaseJson other);
@@ -2137,10 +2218,16 @@ public:
      * @param data The JSON object literal string to set or deserialize.
      * @return boolean status of the operation.
      *
-     * Call FirebaseJson.errorPosition to get the error.
+     * @note Call FirebaseJson.errorPosition to get the error.
      */
     template <typename T>
-    bool setJsonData(T data) { return setRaw(getStr(data)); }
+    bool setJsonData(T data)
+    {
+        char *s = NULL;
+        bool ret = setRaw(getStr(data, s));
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Set JSON data via derived Stream object to FirebaseJson object.
@@ -2184,20 +2271,27 @@ public:
      * @return instance of an object.
      */
     template <typename T>
-    FirebaseJson &add(T key) { return nAdd(getStr(key), NULL); }
+    FirebaseJson &add(T key)
+    {
+        char *s = NULL;
+        nAdd(getStr(key, s), NULL);
+        delP(&s);
+        return *this;
+    }
 
     /**
      * Add value to FirebaseJson object.
      *
      * @param key The new key string that string value to be added.
      * @param value The value for the new specified key.
-     *
      * @return instance of an object.
      */
     template <typename T1, typename T2>
     FirebaseJson &add(T1 key, T2 value) { return dataHandler(key, value, fb_json_func_type_add); }
+
     template <typename T>
     FirebaseJson &add(T key, FirebaseJson &value) { return dataHandler(key, value, fb_json_func_type_add); }
+
     template <typename T>
     FirebaseJson &add(T key, FirebaseJsonArray &value) { return dataHandler(key, value, fb_json_func_type_add); }
 
@@ -2246,17 +2340,28 @@ public:
      * FirebaseJson::NULL = 8
      */
     template <typename T>
-    bool get(FirebaseJsonData &result, T path, bool prettify = false) { return mGet(root, &result, getStr(path), prettify); }
+    bool get(FirebaseJsonData &result, T path, bool prettify = false)
+    {
+        char *s = NULL;
+        bool ret = mGet(root, &result, getStr(path, s), prettify);
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Check whether key or path to the child element existed in FirebaseJson object or not.
      *
      * @param path The key or path of child element check.
      * @return boolean status indicated the existence of element.
-     *
      */
     template <typename T>
-    bool isMember(T path) { return mGet(root, NULL, getStr(path)); }
+    bool isMember(T path)
+    {
+        char *s = NULL;
+        bool ret = mGet(root, NULL, getStr(path, s));
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Parse and collect all node/array elements in FirebaseJson object.
@@ -2300,11 +2405,17 @@ public:
      * Set null to FirebaseJson object at the specified node path.
      *
      * @param path The relative path that null to be set.
-     * The relative path can be mixed with array index (number placed inside square brackets) and node names
+     *
+     * @note The relative path can be mixed with array index (number placed inside square brackets) and node names
      * e.g. /myRoot/[2]/Sensor1/myData/[3].
      */
     template <typename T>
-    void set(T key) { mSet(getStr(key), NULL); }
+    void set(T key)
+    {
+        char *s = NULL;
+        mSet(getStr(key, s), NULL);
+        delP(&s);
+    }
 
     /**
      * Set value to FirebaseJson object at the specified node path.
@@ -2312,7 +2423,7 @@ public:
      * @param path The relative path that string value to be set.
      * @param value The value to set.
      *
-     * The relative path can be mixed with array index (number placed inside square brackets) and node names
+     * @note The relative path can be mixed with array index (number placed inside square brackets) and node names
      * e.g. /myRoot/[2]/Sensor1/myData/[3].
      *
      * The value that can be added is the following supported types e.g. flash string (PROGMEM and FPSTR/PSTR),
@@ -2321,8 +2432,10 @@ public:
      */
     template <typename T1, typename T2>
     void set(T1 key, T2 value) { dataHandler(key, value, fb_json_func_type_set); }
+
     template <typename T>
     FirebaseJson &set(T key, FirebaseJson &value) { return dataHandler(key, value, fb_json_func_type_set); }
+
     template <typename T>
     FirebaseJson &set(T key, FirebaseJsonArray &value) { return dataHandler(key, value, fb_json_func_type_set); }
 
@@ -2333,7 +2446,13 @@ public:
      * @return bool value represents the success operation.
      */
     template <typename T>
-    bool remove(T path) { return mRemove(getStr(path)); }
+    bool remove(T path)
+    {
+        char *s = NULL;
+        bool ret = mRemove(getStr(path, s));
+        delP(&s);
+        return ret;
+    }
 
     /**
      * Get raw JSON
@@ -2378,50 +2497,62 @@ private:
     template <typename T1, typename T2>
     auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_bool<T2>::value, FirebaseJson &>::type
     {
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateBool(arg2));
+            nAdd(getStr(arg1, s), MB_JSON_CreateBool(arg2));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateBool(arg2));
+            mSet(getStr(arg1, s), MB_JSON_CreateBool(arg2));
+        delP(&s);
         return *this;
     }
 
     template <typename T1, typename T2>
     auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_num_int<T2>::value, FirebaseJson &>::type
     {
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
+            nAdd(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, -1)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, -1)));
+            mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, -1)));
+        delP(&s);
         return *this;
     }
 
     template <typename T1, typename T2>
     auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, float>::value, FirebaseJson &>::type
     {
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
+            nAdd(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
+            mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, floatDigits)));
+        delP(&s);
         return *this;
     }
 
     template <typename T1, typename T2>
     auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && MB_IS_SAME<T2, double>::value, FirebaseJson &>::type
     {
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
+            nAdd(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
+            mSet(getStr(arg1, s), MB_JSON_CreateRaw(num2Str(arg2, doubleDigits)));
+        delP(&s);
         return *this;
     }
 
     template <typename T1, typename T2>
     auto dataHandler(T1 arg1, T2 arg2, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T1>::value && is_string<T2>::value, FirebaseJson &>::type
     {
+        char *s1 = NULL;
+        char *s2 = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg1), MB_JSON_CreateString(getStr(arg2)));
+            nAdd(getStr(arg1, s1), MB_JSON_CreateString(getStr(arg2, s2)));
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg1), MB_JSON_CreateString(getStr(arg2)));
+            mSet(getStr(arg1, s1), MB_JSON_CreateString(getStr(arg2, s2)));
+        delP(&s1);
+        delP(&s2);
         return *this;
     }
 
@@ -2429,10 +2560,12 @@ private:
     auto dataHandler(T arg, FirebaseJson &json, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJson &>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(json.root, true);
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg), e);
+            nAdd(getStr(arg, s), e);
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg), e);
+            mSet(getStr(arg, s), e);
+        delP(&s);
         return *this;
     }
 
@@ -2440,10 +2573,12 @@ private:
     auto dataHandler(T arg, FirebaseJsonArray &arr, fb_json_func_type_t type) -> typename MB_ENABLE_IF<is_string<T>::value, FirebaseJson &>::type
     {
         MB_JSON *e = MB_JSON_Duplicate(arr.root, true);
+        char *s = NULL;
         if (type == fb_json_func_type_add)
-            nAdd(getStr(arg), e);
+            nAdd(getStr(arg, s), e);
         else if (type == fb_json_func_type_set)
-            mSet(getStr(arg), e);
+            mSet(getStr(arg, s), e);
+        delP(&s);
         return *this;
     }
 };

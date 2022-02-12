@@ -1,9 +1,9 @@
 /*
- * FirebaseJson, version 2.6.9
+ * FirebaseJson, version 2.6.10
  * 
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  * 
- * Created February 8, 2022
+ * Created February 11, 2022
  * 
  * Features
  * - Using path to access node element in search style e.g. json.get(result,"a/b/c") 
@@ -1055,6 +1055,59 @@ bool FirebaseJsonData::mGetJSON(const char *source, FirebaseJson &json)
     json.root = json.parse(source);
 
     return json.root != NULL;
+}
+
+size_t FirebaseJsonData::getReservedLen(size_t len)
+{
+    int blen = len + 1;
+
+    int newlen = (blen / 4) * 4;
+
+    if (newlen < blen)
+        newlen += 4;
+
+    return (size_t)newlen;
+}
+
+void FirebaseJsonData::delP(void *ptr)
+{
+    void **p = (void **)ptr;
+    if (*p)
+    {
+        free(*p);
+        *p = 0;
+    }
+}
+
+void *FirebaseJsonData::newP(size_t len)
+{
+    void *p;
+    size_t newLen = getReservedLen(len);
+#if defined(BOARD_HAS_PSRAM) && defined(MB_STRING_USE_PSRAM)
+
+    p = (void *)ps_malloc(newLen);
+    if (!p)
+        return NULL;
+
+#else
+
+#if defined(ESP8266_USE_EXTERNAL_HEAP)
+    ESP.setExternalHeap();
+#endif
+
+    p = (void *)malloc(newLen);
+    bool nn = p ? true : false;
+
+#if defined(ESP8266_USE_EXTERNAL_HEAP)
+    ESP.resetHeap();
+#endif
+
+    if (!nn)
+        return NULL;
+
+#endif
+    memset(p, 0, newLen);
+    return p;
 }
 
 void FirebaseJsonData::clear()
