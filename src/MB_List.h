@@ -1,7 +1,7 @@
 /*
- * Just a simple dynamic array implementation, MB_List v1.0.2
+ * Just a simple dynamic array implementation, MB_List v1.0.3
  * 
- * February 1, 2022
+ * Created February 4, 2022
  * 
  * The MIT License (MIT)
  * Copyright (c) 2022 K. Suwatchai (Mobizt)
@@ -53,6 +53,19 @@ public:
     ~MB_List()
     {
         clear();
+    }
+
+    void swap(MB_List &el)
+    {
+        MB_List _el;
+       _el.e = this->e;
+       _el.eSize = this->eSize;
+       clear();
+       this->e = el.e;
+       this->eSize = el.eSize;
+       el.clear();
+       el.e = _el.e;
+       el.eSize = _el.eSize;
     }
 
     void push_back(eType &e)
