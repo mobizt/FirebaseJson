@@ -8,5 +8,5 @@
     },
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32","teensy", "atmelsam","ststm32","atmelavr","atmelmegaavr","raspberrypi"],
-    "version": "2.6.13"
+    "version": "2.6.14"
 }
