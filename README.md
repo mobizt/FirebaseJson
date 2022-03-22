@@ -221,11 +221,6 @@ In ESP32, to use PSRAM/SRAM for internal memory allocation which you can config 
 
 FirebaseJson usages are so simple as you read, store and update(edit) the JSON node in Firebase RTDB.
 
-It doesn't use the recursive call to parse or deserialize complex or nested JSON objects and arrays. 
-
-This makes the library can use with a limited memory device. 
-
-
 Since you declare the FirebaseJson or FirebaseJsonArray object, use the functions `setJsonData`, `setJsonArrayData`, `add`, `set` and `remove` to build or edit the JSON/Array object and use `get` to parse the node's contents. 
 
 Defined the relative path of the specific node to `add`, `set`, `remove` and `get` functions to add, set, remove and get its contents.
