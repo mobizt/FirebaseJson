@@ -768,10 +768,13 @@ void FirebaseJsonBase::mSetElementType(FirebaseJsonData *result)
 
         strcpy(buf, (const char *)MBSTRING_FLASH_MCR("string"));
         result->typeNum = JSON_STRING;
-        
-        //try cast to numbers
-        mSetResInt(result, result->stringValue.c_str());
-        mSetResFloat(result, result->stringValue.c_str());
+
+        // try casting the string to numbers
+        if (result->stringValue.length() <= 32)
+        {
+            mSetResInt(result, result->stringValue.c_str());
+            mSetResFloat(result, result->stringValue.c_str());
+        }
     }
     else if (result->type_num == MB_JSON_NULL)
     {
