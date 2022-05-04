@@ -1,5 +1,5 @@
 /*
- * FirebaseJson, version 2.6.18
+ * FirebaseJson, version 2.7.0
  *
  * The Easiest Arduino library to parse, create and edit JSON object using a relative path.
  *
@@ -54,6 +54,7 @@
 
 #include <FS.h>
 
+#define MB_JSON_FS_H
 #endif
 #endif
 
@@ -752,6 +753,16 @@ protected:
     {
         return writeStream(out, prettify);
     }
+
+#if defined(MB_JSON_FS_H)
+
+    template <typename T>
+    auto toStringHandler(T &out, bool prettify) -> typename MB_ENABLE_IF<MB_IS_SAME<T, File>::value, bool>::type
+    {
+        return writeStream(out, prettify);
+    }
+
+#endif
 
     template <typename T>
     bool writeStream(T &out, bool prettify)
@@ -1936,10 +1947,20 @@ public:
      * @param prettify The text indentation and new line serialization option.
      */
     template <typename T>
-    bool toString(T &out, bool prettify = false) { return toStringHandler(out, prettify); }
-
-    template <typename T>
     bool toString(T *ptr, bool prettify = false) { return toStringPtrHandler(ptr, prettify); }
+
+    bool toString(Stream &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+    bool toString(String &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+    bool toString(MB_String &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+#if !defined(__AVR__)
+    bool toString(std::string &out, bool prettify = false)
+    {
+        return toStringHandler(out, prettify);
+    }
+#endif
 
     /**
      * Get raw JSON Array
@@ -2426,12 +2447,22 @@ public:
      * @param prettify The text indentation and new line serialization option.
      */
 
-    bool toString(Stream &out, bool prettify = false) { return toStringHandler(out, prettify); }
-
     template <typename T>
     bool toString(T *ptr, bool prettify = false) { return toStringPtrHandler(ptr, prettify); }
 
-  
+    bool toString(Stream &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+    bool toString(String &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+    bool toString(MB_String &out, bool prettify = false) { return toStringHandler(out, prettify); }
+
+#if !defined(__AVR__)
+    bool toString(std::string &out, bool prettify = false)
+    {
+        return toStringHandler(out, prettify);
+    }
+#endif
+
     /**
      * Get the value from the specified node path in FirebaseJson object.
      *
