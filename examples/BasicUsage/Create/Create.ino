@@ -34,7 +34,7 @@ void setup()
     arr.setJsonArrayData("[1,2,3]");
 
     //To add data to json
-    json.add("b" /* key or name only */, 123 /* value of any type */);
+    json.add("b" /* key or name only */, 123 /* value of any type */); // or json["b"] = 123;
 
     //To set data to json
     json.set("a/b/c" /* key or relative path */, "hello" /* value */);
@@ -47,7 +47,7 @@ void setup()
     arr.add(json2);
 
     //To set the value at index
-    arr.set("[0]", 555); // or arr.set(0, 555);
+    arr.set("[0]", 555); // or arr.set(0, 555) or arr[0] = 555;
 
     //To set the value at specific path
     arr.set("/[8]/i", 111);
