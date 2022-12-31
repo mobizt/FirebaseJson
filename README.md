@@ -1545,7 +1545,7 @@ e.g. to<String>(), to<int>(), to<bool>()
 
 The MIT License (MIT)
 
-Copyright (c) 2022 K. Suwatchai (Mobizt)
+Copyright (c) 2023 K. Suwatchai (Mobizt)
 
 Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
 
