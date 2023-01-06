@@ -23,6 +23,7 @@ This library supports any Arduino based MCU, ESP8266, ESP32, Teensy 3.x (ARM-Cor
  * Arduino MKR1000 WIFI
  * STM32F103C
  * STM32FF407
+ * RP2040 Pico
 
 
 ## Features
