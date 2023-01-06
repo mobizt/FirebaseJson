@@ -1,27 +1,25 @@
 /**
  * Created by K. Suwatchai (Mobizt)
- * 
+ *
  * Email: k_suwatchai@hotmail.com
- * 
+ *
  * Github: https://github.com/mobizt
- * 
+ *
  * Copyright (c) 2023 mobizt
  *
-*/
+ */
 
 #include <Arduino.h>
-#if defined(ESP32)
+#if defined(ESP32) || defined(PICO_RP2040)
 #include <WiFi.h>
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #endif
 
-//This example is for ESP8266 and ESP32
+// This example is for ESP8266 and ESP32
 
 #include <WiFiClientSecure.h>
 
-//Enable WiFiClientSecure library after include the library and before include the FirebaseJson.
-#define FBJS_ENABLE_WIFI_CLIENT_SECURE
 #include <FirebaseJson.h>
 
 /* Define the WiFi credentials */
@@ -60,7 +58,7 @@ void loop()
         FirebaseJsonData result;
 
         WiFiClientSecure sslClient;
-        sslClient.setInsecure(); //skip cert verification
+        sslClient.setInsecure(); // skip cert verification
 
         json.add("name", "esp");
         json.set("data/arr/[0]", count + 1);
@@ -83,7 +81,7 @@ void loop()
 
             Serial.print("Read response...");
 
-            //Automatically parsing for response (w or w/o header) with chunk encoding supported.
+            // Automatically parsing for response (w or w/o header) with chunk encoding supported.
             if (json.readFrom(sslClient))
             {
                 Serial.println();
