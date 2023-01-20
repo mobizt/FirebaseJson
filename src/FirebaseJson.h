@@ -1,4 +1,3 @@
-
 /*
  * FirebaseJson, version 3.0.5
  *
