@@ -1,0 +1,103 @@
+name: Compile Examples
+
+on:
+  push:
+    paths-ignore:
+      - '.github/workflows/cpp_lint.yml'
+      - '.github/workflows/compile_library.yml'
+  pull_request:
+    paths-ignore:
+      - '.github/workflows/cpp_lint.yml'
+      - '.github/workflows/compile_library.yml'
+
+jobs:
+  esp8266:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: 
+        - "examples/BasicUsage/Create/Create.ino"
+        - "examples/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino"
+        
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+        
+    - name: Install library
+      run: | 
+        pio lib -g install \
+        https://github.com/mobizt/FirebaseJson
+        
+    - name: update library
+      run: |
+        pio lib --global update
+
+    - name: Run PlatformIO Examples
+      run: |
+        pio ci --board=d1_mini \
+         --lib=src/addons/FireSense/FireSense.h \
+         --lib=src/addons/RTDBHelper.h \
+         --lib=src/addons/TokenHelper.h \
+         --lib=examples/CloudFunctions/CreateFunction/DeployAutoZipFunction/AutoZip.h
+      env:
+        PLATFORMIO_CI_SRC: ${{ matrix.example }}
+
+  esp32:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: 
+        - "examples/BasicUsage/Create/Create.ino"
+        - "examples/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+
+    - name: Install library
+      run: | 
+        pio lib -g install \
+        https://github.com/mobizt/FirebaseJson
+        
+    - name: update library
+      run: |
+        pio lib --global update
+
+    - name: Run PlatformIO Examples
+      run: |
+        pio ci --board=esp32dev \
+      env:
+        PLATFORMIO_CI_SRC: ${{ matrix.example }}
