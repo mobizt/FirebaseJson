@@ -52,10 +52,6 @@ jobs:
     - name: Run PlatformIO Examples
       run: |
         pio ci --board=d1_mini \
-         --lib=src/addons/FireSense/FireSense.h \
-         --lib=src/addons/RTDBHelper.h \
-         --lib=src/addons/TokenHelper.h \
-         --lib=examples/CloudFunctions/CreateFunction/DeployAutoZipFunction/AutoZip.h
       env:
         PLATFORMIO_CI_SRC: ${{ matrix.example }}
 
