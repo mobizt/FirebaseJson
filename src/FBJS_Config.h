@@ -7,4 +7,7 @@
 #define FIREBASEJSON_USE_PSRAM
 #endif
 
+/** Use filesystems */
+#define FIREBASEJSON_USE_FS
+
 #endif
