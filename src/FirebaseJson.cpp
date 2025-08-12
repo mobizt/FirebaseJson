@@ -80,8 +80,8 @@ bool FirebaseJsonBase::setRaw(const char *raw)
 
     if (raw)
     {
-        size_t i = 0;
-        while (i < strlen(raw) && raw[i] == ' ')
+        size_t i = 0, len = strlen(raw);
+        while (i < len && (raw[i] == ' ' || raw[i] == '\t' || raw[i] == '\r' || raw[i] == '\n'))
         {
             i++;
         }
